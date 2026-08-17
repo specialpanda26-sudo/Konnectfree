@@ -49,6 +49,18 @@ const intasendWebhook = asyncHandler(async (req, res) => {
     await payment.save();
 
     const pkg = await Package.findById(payment.package);
+
+    // Renewal case: this MAC may already have a live 'bound' Device from
+    // an earlier purchase. router.service.bindDevice() below correctly
+    // refreshes the MikroTik binding in place, but if we don't also
+    // close out the old DB row here, we'd end up with two 'bound'
+    // Device docs for the same MAC — inflating the admin activeDevices
+    // count until the old one naturally expires.
+    await Device.updateMany(
+      { mac: payment.mac, status: 'bound' },
+      { $set: { status: 'expired' } }
+    );
+
     const device = await Device.create({
       mac: payment.mac,
       customer: payment.customer,

@@ -226,6 +226,17 @@
   }
   .buy-btn:hover::after{ left:130%; }
   .buy-btn:active{ background: linear-gradient(180deg, var(--gold-bright), var(--gold-deep)); color:#1a1305; }
+  /* Idle "hovering" float — a gentle continuous bob, separate from the
+     :hover state above. Paused on hover so the two don't fight. */
+  @keyframes buyFloat{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-3px); }
+  }
+  .buy-btn{ animation: buyFloat 2.6s ease-in-out infinite; }
+  .buy-btn:hover{ animation-play-state:paused; }
+  @media (prefers-reduced-motion: reduce){
+    .buy-btn{ animation:none; }
+  }
 
   /* ---------- STEPS ---------- */
   .steps{ margin-top:16px; display:flex; flex-direction:column; gap:10px; }
@@ -429,6 +440,24 @@
   }
   .mac-bar-label{ color:var(--text-lo); }
   .mac-bar-val{ color:var(--gold-bright); font-weight:500; }
+
+  /* ---------- COVERAGE BANNER ---------- */
+  .coverage-banner{
+    margin:16px 22px 0;
+    display:flex; align-items:center; gap:10px;
+    padding:11px 14px;
+    background: linear-gradient(160deg, rgba(232,196,104,0.09), rgba(232,196,104,0.02));
+    border:1px solid rgba(232,196,104,0.25);
+    border-radius:var(--radius-sm);
+  }
+  .coverage-icon{
+    width:26px; height:26px; flex-shrink:0; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(232,196,104,0.14);
+  }
+  .coverage-icon svg{ width:14px; height:14px; stroke:var(--gold-bright); }
+  .coverage-text{ font-size:11.5px; color:var(--text-mid); line-height:1.4; }
+  .coverage-text strong{ color:var(--gold-pale); font-weight:700; }
 
   /* ---------- FORM CARDS (voucher / reconnect / login / TV) ---------- */
   .form-card{
@@ -736,6 +765,17 @@
     <div class="status-pill"><span class="status-dot"></span> Dish online — signal strong</div>
   </div>
 
+  <!-- COVERAGE BANNER — reassures the customer that a package they buy
+       isn't tied to one physical dish; it works at any Konnect Free /
+       Ogollatech hotspot they sign into. This is a messaging/UX layer
+       only — it does not change how binding works (a package still
+       binds to one MAC via the router that issued it; see MAC BAR
+       below and public.routes.js for the actual enforcement). -->
+  <div class="coverage-banner">
+    <div class="coverage-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M3 12h18"/></svg></div>
+    <div class="coverage-text">One account works <strong>everywhere we have signal</strong> — just sign in on the WiFi network at any Konnect Free hotspot.</div>
+  </div>
+
   <!-- MAC BAR -->
   <div class="mac-bar">
     <span class="mac-bar-label">Your MAC address</span>
@@ -767,49 +807,103 @@
     <div class="section-sub">Every plan runs off the same dish — pick by how long you need to stay connected.</div>
 
     <div class="grid" id="packageGrid">
-      <div class="card" data-name="Daily" data-data="10GB" data-period="24 Hours" data-price="KSh 180">
+      <div class="card" data-name="Starter" data-data="1.5GB" data-period="2 Hours" data-price="KSh 50">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div>
+        <div class="card-name">Starter</div>
+        <div class="card-data">1.5GB</div>
+        <div class="card-period">2 hours</div>
+        <div class="card-price">KSh 50</div>
+        <button class="buy-btn">Buy now</button>
+      </div>
+
+      <div class="card" data-name="Night Owl" data-data="5GB" data-period="8 Hours" data-price="KSh 80">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/></svg></div>
+        <div class="card-name">Night Owl</div>
+        <div class="card-data">5GB</div>
+        <div class="card-period">8 hours</div>
+        <div class="card-price">KSh 80</div>
+        <button class="buy-btn">Buy now</button>
+      </div>
+
+      <div class="card" data-name="3-Hour" data-data="4GB" data-period="3 Hours" data-price="KSh 100">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div class="card-name">3-Hour</div>
+        <div class="card-data">4GB</div>
+        <div class="card-period">3 hours</div>
+        <div class="card-price">KSh 100</div>
+        <button class="buy-btn">Buy now</button>
+      </div>
+
+      <div class="card" data-name="Daily" data-data="10GB" data-period="24 Hours" data-price="KSh 150">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
         <div class="card-name">Daily</div>
         <div class="card-data">10GB</div>
         <div class="card-period">24 hours</div>
-        <div class="card-price">KSh 180</div>
+        <div class="card-price">KSh 150</div>
         <button class="buy-btn">Buy now</button>
       </div>
 
-      <div class="card" data-name="Weekly" data-data="12GB" data-period="1 Week" data-price="KSh 200">
+      <div class="card" data-name="Weekend" data-data="15GB" data-period="54 Hours" data-price="KSh 250">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18"/><path d="M8 3v3M16 3v3"/></svg></div>
+        <div class="card-name">Weekend</div>
+        <div class="card-data">15GB</div>
+        <div class="card-period">Fri–Sun</div>
+        <div class="card-price">KSh 250</div>
+        <button class="buy-btn">Buy now</button>
+      </div>
+
+      <div class="card" data-name="Weekly" data-data="20GB" data-period="1 Week" data-price="KSh 350">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18"/><path d="M8 3v3M16 3v3"/></svg></div>
         <div class="card-name">Weekly</div>
-        <div class="card-data">12GB</div>
+        <div class="card-data">20GB</div>
         <div class="card-period">1 week</div>
-        <div class="card-price">KSh 200</div>
+        <div class="card-price">KSh 350</div>
         <button class="buy-btn">Buy now</button>
       </div>
 
-      <div class="card popular" data-name="Extended" data-data="18GB" data-period="3 Weeks" data-price="KSh 450">
+      <div class="card popular" data-name="Bi-Weekly" data-data="30GB" data-period="2 Weeks" data-price="KSh 600">
         <div class="ribbon">Popular</div>
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5z"/></svg></div>
-        <div class="card-name">Extended</div>
-        <div class="card-data">18GB</div>
-        <div class="card-period">3 weeks</div>
-        <div class="card-price">KSh 450</div>
+        <div class="card-name">Bi-Weekly</div>
+        <div class="card-data">30GB</div>
+        <div class="card-period">2 weeks</div>
+        <div class="card-price">KSh 600</div>
         <button class="buy-btn">Buy now</button>
       </div>
 
-      <div class="card" data-name="Monthly" data-data="30GB" data-period="1 Month" data-price="KSh 900">
+      <div class="card" data-name="Extended" data-data="40GB" data-period="3 Weeks" data-price="KSh 800">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5z"/></svg></div>
+        <div class="card-name">Extended</div>
+        <div class="card-data">40GB</div>
+        <div class="card-period">3 weeks</div>
+        <div class="card-price">KSh 800</div>
+        <button class="buy-btn">Buy now</button>
+      </div>
+
+      <div class="card" data-name="Monthly" data-data="60GB" data-period="1 Month" data-price="KSh 1,200">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l7-3.5"/></svg></div>
         <div class="card-name">Monthly</div>
-        <div class="card-data">30GB</div>
+        <div class="card-data">60GB</div>
         <div class="card-period">1 month</div>
-        <div class="card-price">KSh 900</div>
+        <div class="card-price">KSh 1,200</div>
         <button class="buy-btn">Buy now</button>
       </div>
 
-      <div class="card wide" data-name="2 Months" data-data="Unlimited" data-period="2 Months" data-price="KSh 1,600">
+      <div class="card" data-name="Family" data-data="25GB" data-period="1 Week" data-price="KSh 1,500">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M14.5 14.5c2.6.3 4.5 2.4 4.5 5.5"/></svg></div>
+        <div class="card-name">Family</div>
+        <div class="card-data">25GB</div>
+        <div class="card-period">1 week · 3 devices</div>
+        <div class="card-price">KSh 1,500</div>
+        <button class="buy-btn">Buy now</button>
+      </div>
+
+      <div class="card wide" data-name="Unlimited" data-data="Unlimited" data-period="2 Months" data-price="KSh 2,000">
         <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 12c0-3 2-5 5-5s5 2 5 5-2 5-5 5-5-2-5-5z"/><path d="M2 12h2M20 12h2"/></svg></div>
-        <div class="card-name">2 Months — Unlimited</div>
+        <div class="card-name">Unlimited — 2 Months</div>
         <div class="card-data">Unlimited</div>
         <div class="card-period">2 months</div>
-        <div class="card-price">KSh 1,600</div>
+        <div class="card-price">KSh 2,000</div>
         <button class="buy-btn">Buy now</button>
       </div>
     </div>

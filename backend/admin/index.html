@@ -140,6 +140,21 @@
   const API_BASE = window.KONNECT_API_BASE || '';
 
   const $ = (id) => document.getElementById(id);
+
+  // Escapes any value before it goes into an innerHTML template. Several
+  // fields rendered below (customer name from /api/stk-push, phone/mac
+  // from /api/verify-mpesa-message) are attacker-controlled public input
+  // that is only length-trimmed server-side, never HTML-stripped — so
+  // every one of them MUST go through this, not just the message field.
+  function esc(val) {
+    if (val === null || val === undefined) return '';
+    return String(val)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
   let token = null; // kept in memory + localStorage; for stronger hardening,
                      // move to an httpOnly cookie issued by the login endpoint instead.
 
@@ -231,12 +246,12 @@
     const { devices } = await api('/api/admin/devices/failed');
     $('failedTable').querySelector('tbody').innerHTML = devices.map((d) => `
       <tr>
-        <td style="font-family:'IBM Plex Mono',monospace;">${d.mac}</td>
-        <td>${d.customer?.name || '—'} · ${d.customer?.phone || '—'}</td>
-        <td>${d.package?.name || '—'}</td>
-        <td style="color:var(--fail); font-size:11.5px; max-width:220px;">${d.routerNote || '—'}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;">${esc(d.mac)}</td>
+        <td>${esc(d.customer?.name) || '—'} · ${esc(d.customer?.phone) || '—'}</td>
+        <td>${esc(d.package?.name) || '—'}</td>
+        <td style="color:var(--fail); font-size:11.5px; max-width:220px;">${esc(d.routerNote) || '—'}</td>
         <td>${new Date(d.createdAt).toLocaleString()}</td>
-        <td><button data-retry="${d._id}" style="padding:5px 10px;font-size:11.5px;">Retry bind</button></td>
+        <td><button data-retry="${esc(d._id)}" style="padding:5px 10px;font-size:11.5px;">Retry bind</button></td>
       </tr>`).join('') || '<tr><td colspan="6" style="color:var(--text-lo);">Nothing needs attention.</td></tr>';
   }
 
@@ -258,20 +273,20 @@
   async function loadReviews() {
     const { reviews } = await api('/api/admin/mpesa-reviews?status=pending');
     const packages = await getPackages().catch(() => []);
-    const pkgOptions = packages.map((p) => `<option value="${p._id}">${p.name} · KSh ${p.priceKsh}</option>`).join('');
+    const pkgOptions = packages.map((p) => `<option value="${esc(p._id)}">${esc(p.name)} · KSh ${esc(p.priceKsh)}</option>`).join('');
     $('reviewsTable').querySelector('tbody').innerHTML = reviews.map((r) => `
       <tr>
-        <td class="msg-cell">${(r.message || '').replace(/</g, '&lt;')}</td>
-        <td>${r.extractedAmountKsh ? 'KSh ' + r.extractedAmountKsh : '—'}</td>
-        <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">${r.extractedCode || '—'}</td>
-        <td>${r.phone || '—'}</td>
-        <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">${r.mac || '—'}</td>
+        <td class="msg-cell">${esc(r.message)}</td>
+        <td>${r.extractedAmountKsh ? 'KSh ' + esc(r.extractedAmountKsh) : '—'}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">${esc(r.extractedCode) || '—'}</td>
+        <td>${esc(r.phone) || '—'}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">${esc(r.mac) || '—'}</td>
         <td>${new Date(r.createdAt).toLocaleString()}</td>
         <td>
           <div class="row-actions">
-            <select data-pkg-for="${r._id}" ${!r.mac ? 'disabled' : ''}><option value="">Package…</option>${pkgOptions}</select>
-            <button data-approve="${r._id}" ${!r.mac ? 'disabled title="No MAC on file — reject and ask them to resubmit"' : ''}>Approve &amp; connect</button>
-            <button class="danger" data-reject="${r._id}">Reject</button>
+            <select data-pkg-for="${esc(r._id)}" ${!r.mac ? 'disabled' : ''}><option value="">Package…</option>${pkgOptions}</select>
+            <button data-approve="${esc(r._id)}" ${!r.mac ? 'disabled title="No MAC on file — reject and ask them to resubmit"' : ''}>Approve &amp; connect</button>
+            <button class="danger" data-reject="${esc(r._id)}">Reject</button>
           </div>
         </td>
       </tr>`).join('') || '<tr><td colspan="7" style="color:var(--text-lo);">Nothing pending review.</td></tr>';
@@ -326,10 +341,10 @@
     const { devices } = await api('/api/admin/devices');
     $('devicesTable').querySelector('tbody').innerHTML = devices.map((d) => `
       <tr>
-        <td style="font-family:'IBM Plex Mono',monospace;">${d.mac}</td>
-        <td>${d.customer?.name || '—'} · ${d.customer?.phone || '—'}</td>
-        <td>${d.package?.name || '—'}</td>
-        <td><span class="badge ${d.status}">${d.status}</span></td>
+        <td style="font-family:'IBM Plex Mono',monospace;">${esc(d.mac)}</td>
+        <td>${esc(d.customer?.name) || '—'} · ${esc(d.customer?.phone) || '—'}</td>
+        <td>${esc(d.package?.name) || '—'}</td>
+        <td><span class="badge ${esc(d.status)}">${esc(d.status)}</span></td>
         <td>${d.expiresAt ? new Date(d.expiresAt).toLocaleString() : '—'}</td>
       </tr>`).join('') || '<tr><td colspan="5" style="color:var(--text-lo);">No devices yet.</td></tr>';
   }
@@ -338,11 +353,11 @@
     const { payments } = await api('/api/admin/payments');
     $('paymentsTable').querySelector('tbody').innerHTML = payments.map((p) => `
       <tr>
-        <td>${p.phone}</td>
-        <td>${p.package?.name || '—'}</td>
-        <td>KSh ${p.amountKsh}</td>
-        <td><span class="badge ${p.status}">${p.status}</span></td>
-        <td>${p.mpesaCode || '—'}</td>
+        <td>${esc(p.phone)}</td>
+        <td>${esc(p.package?.name) || '—'}</td>
+        <td>KSh ${esc(p.amountKsh)}</td>
+        <td><span class="badge ${esc(p.status)}">${esc(p.status)}</span></td>
+        <td>${esc(p.mpesaCode) || '—'}</td>
       </tr>`).join('') || '<tr><td colspan="5" style="color:var(--text-lo);">No payments yet.</td></tr>';
   }
 
@@ -366,11 +381,11 @@
     const { vouchers } = await api('/api/admin/vouchers');
     $('vouchersTable').querySelector('tbody').innerHTML = vouchers.map((v) => `
       <tr>
-        <td style="font-family:'IBM Plex Mono',monospace;">${v.code}</td>
-        <td>${v.package?.name || '—'}</td>
-        <td><span class="badge ${v.status === 'used' ? 'paid' : v.status === 'revoked' ? 'failed' : 'pending'}">${v.status}</span></td>
-        <td>${v.batchLabel || '—'}</td>
-        <td>${v.status === 'unused' ? `<button class="ghost" data-revoke="${v._id}" style="padding:5px 10px;font-size:11.5px;">Deactivate</button>` : ''}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;">${esc(v.code)}</td>
+        <td>${esc(v.package?.name) || '—'}</td>
+        <td><span class="badge ${v.status === 'used' ? 'paid' : v.status === 'revoked' ? 'failed' : 'pending'}">${esc(v.status)}</span></td>
+        <td>${esc(v.batchLabel) || '—'}</td>
+        <td>${v.status === 'unused' ? `<button class="ghost" data-revoke="${esc(v._id)}" style="padding:5px 10px;font-size:11.5px;">Deactivate</button>` : ''}</td>
       </tr>`).join('') || '<tr><td colspan="5" style="color:var(--text-lo);">No vouchers yet.</td></tr>';
   }
 

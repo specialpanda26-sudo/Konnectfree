@@ -151,6 +151,10 @@ const approveMpesaReview = asyncHandler(async (req, res) => {
     );
   }
 
+  // Close out any existing live binding for this MAC before opening a
+  // new one — see the matching comment in webhook.controller.js.
+  await Device.updateMany({ mac, status: 'bound' }, { $set: { status: 'expired' } });
+
   const device = await Device.create({
     mac,
     customer: customer?._id,

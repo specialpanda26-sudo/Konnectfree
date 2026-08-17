@@ -35,6 +35,10 @@ const activateVoucher = asyncHandler(async (req, res) => {
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
 
+  // Close out any existing live binding for this MAC before opening a
+  // new one — see the matching comment in webhook.controller.js.
+  await Device.updateMany({ mac, status: 'bound' }, { $set: { status: 'expired' } });
+
   const device = await Device.create({
     mac, customer: customer._id, package: pkg._id, status: 'pending',
   });
