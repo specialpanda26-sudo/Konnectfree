@@ -453,6 +453,21 @@
     padding:11px 13px;
   }
   .mac-detected.missing{ color:var(--danger); }
+  /* Manual fallback input — only shown when no router-supplied MAC is
+     present, so checkout isn't blocked just because auto-detect failed. */
+  .mac-manual-input{
+    width:100%; box-sizing:border-box;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px; font-weight:600; letter-spacing:0.03em;
+    color:var(--gold-bright);
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius-sm);
+    padding:11px 13px;
+    outline:none;
+  }
+  .mac-manual-input:focus{ border-color:var(--gold-bright); }
+  .mac-manual-input.invalid{ border-color:var(--danger); color:var(--danger); }
 
   /* ---------- NETWORK SPEED WIDGET ---------- */
   .speed-card{
@@ -1243,6 +1258,7 @@
       <div class="field mono">
         <label>Device MAC address</label>
         <div class="mac-detected" id="formMacDisplay">Detecting…</div>
+        <input type="text" class="mac-manual-input" id="formMacInput" placeholder="e.g. AA:BB:CC:DD:EE:FF" style="display:none;">
         <div class="field-hint" id="macHint">Detected automatically from your connection — no need to type it in.</div>
       </div>
 
@@ -1672,20 +1688,23 @@
   const formMacDisplay = document.getElementById('formMacDisplay');
   const confirmBtn = document.getElementById('confirmBtn');
 
-  // No manual MAC entry on this form anymore — it's read straight from
-  // routerMac (set above from the captive-portal redirect URL). If it's
-  // missing, the customer opened this page outside the hotspot's login
-  // flow, so we tell them how to fix that and disable checkout instead
-  // of letting them guess/mistype a MAC by hand.
+  // Prefer the router-supplied MAC (set above from the captive-portal
+  // redirect URL). If it's missing — e.g. the customer opened this page
+  // outside the hotspot's login flow — fall back to letting them type
+  // it in themselves instead of blocking checkout entirely.
+  const formMacInput = document.getElementById('formMacInput');
+  const MAC_REGEX = /^([0-9A-F]{2}:){5}[0-9A-F]{2}$/;
+  let manualMac = '';
   if(routerMac){
     formMacDisplay.textContent = routerMac.toUpperCase();
   } else {
-    formMacDisplay.textContent = 'Not detected';
-    formMacDisplay.classList.add('missing');
-    macHint.textContent = "We couldn't detect your device. Please open this page from the WiFi sign-in screen on the device you want connected.";
-    confirmBtn.disabled = true;
-    confirmBtn.style.opacity = '0.5';
-    confirmBtn.style.cursor = 'not-allowed';
+    formMacDisplay.style.display = 'none';
+    formMacInput.style.display = 'block';
+    macHint.textContent = "We couldn't auto-detect your device. You can find your MAC address in your device's WiFi/network settings, or type it in below.";
+    formMacInput.addEventListener('input', () => {
+      manualMac = formMacInput.value.trim().toUpperCase();
+      formMacInput.classList.remove('invalid');
+    });
   }
 
   const stepForm = document.getElementById('stepForm');
@@ -1753,20 +1772,27 @@
   confirmBtn.addEventListener('click', () => {
     const name = document.getElementById('custName').value.trim();
     const phone = document.getElementById('custPhone').value.trim();
-    if(!routerMac){
-      formMacDisplay.classList.add('missing');
-      return;
-    }
-    if(!name || !phone){
-      confirmBtn.textContent = 'Please fill in all fields';
+    const mac = routerMac ? routerMac.toUpperCase() : manualMac;
+
+    function flashError(msg){
+      confirmBtn.textContent = msg;
       confirmBtn.style.background = 'linear-gradient(120deg,#d98a6a,#a9522f)';
       setTimeout(()=>{
         confirmBtn.textContent = 'Pay & connect device';
         confirmBtn.style.background = '';
       }, 1600);
+    }
+
+    if(!mac || !MAC_REGEX.test(mac)){
+      if(!routerMac) formMacInput.classList.add('invalid');
+      flashError('Enter a valid MAC address');
       return;
     }
-    startPayment({ name, phone, mac: routerMac.toUpperCase(), package: selectedPackage });
+    if(!name || !phone){
+      flashError('Please fill in all fields');
+      return;
+    }
+    startPayment({ name, phone, mac, package: selectedPackage });
   });
 
   /*
