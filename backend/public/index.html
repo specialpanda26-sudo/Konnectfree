@@ -330,7 +330,9 @@
     padding:6px 26px 6px 10px;
     cursor:pointer; position:relative;
     font-family:'Manrope', sans-serif;
+    transition:background 0.15s ease, border-color 0.15s ease;
   }
+  .csel-trigger:hover{ background:rgba(232,196,104,0.08); border-color:var(--gold-bright); }
   .csel-trigger::after{
     content:''; position:absolute; right:9px; top:50%;
     width:6px; height:6px;
@@ -402,7 +404,9 @@
     color:var(--text-mid);
     font-size:16px;
     cursor:pointer;
+    transition:background 0.15s ease, color 0.15s ease;
   }
+  .close-x:hover{ background:rgba(232,196,104,0.14); color:var(--gold-bright); }
   .sheet-summary{
     display:flex; justify-content:space-between; align-items:center;
     padding:12px 14px; margin-bottom:18px;
