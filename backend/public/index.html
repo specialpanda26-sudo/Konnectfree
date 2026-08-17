@@ -360,6 +360,23 @@
   }
   .csel-opt:hover{ background:rgba(232,196,104,0.08); color:var(--text-hi); }
   .csel-opt.selected{ color:var(--gold-bright); font-weight:600; }
+  /* Full-width variant — used for in-field pickers like "Select package",
+     matching .field input's exact look instead of the compact inline one. */
+  .csel-block{ display:block; margin-left:0; width:100%; }
+  .csel-trigger-block{
+    display:block; width:100%; text-align:left;
+    padding:13px 34px 13px 14px;
+    font-size:14px; color:var(--text-hi);
+  }
+  .csel-trigger-block::after{
+    content:''; position:absolute; right:14px; top:50%;
+    width:7px; height:7px;
+    border-right:1.5px solid var(--gold-bright);
+    border-bottom:1.5px solid var(--gold-bright);
+    transform:translateY(-65%) rotate(45deg);
+    pointer-events:none;
+  }
+  .csel-panel-block{ width:100%; max-height:260px; overflow-y:auto; }
   .confirm-btn{
     position:relative; overflow:hidden;
     width:100%; padding:15px 0; margin-top:8px;
@@ -1167,7 +1184,13 @@
       </details>
       <div class="field" style="margin-top:14px;">
         <label>Select package</label>
-        <select id="tvPackage"><option value="">Choose a package…</option></select>
+        <select id="tvPackage" style="display:none;"><option value="">Choose a package…</option></select>
+        <div class="csel csel-block" id="tvPackagePicker">
+          <button type="button" class="csel-trigger csel-trigger-block" id="tvPackageTrigger">Choose a package…</button>
+          <div class="csel-panel csel-panel-block" id="tvPackagePanel">
+            <div class="csel-opt selected" data-value="">Choose a package…</div>
+          </div>
+        </div>
       </div>
       <div class="device-note"><b>One device per package.</b> Each package works on a single device only — don't buy one package to share across several devices.</div>
       <div class="field" style="margin-top:14px;">
@@ -1641,11 +1664,38 @@
     try {
       const data = await apiFetch('/packages');
       const sel = document.getElementById('tvPackage');
+      const trigger = document.getElementById('tvPackageTrigger');
+      const panel = document.getElementById('tvPackagePanel');
       (data.packages || []).forEach((p) => {
+        const label = `${p.name} — ${p.dataLimitLabel} · ${p.periodLabel} · KSh ${p.priceKsh.toLocaleString()}`;
         const opt = document.createElement('option');
         opt.value = p._id;
-        opt.textContent = `${p.name} — ${p.dataLimitLabel} · ${p.periodLabel} · KSh ${p.priceKsh.toLocaleString()}`;
+        opt.textContent = label;
         sel.appendChild(opt);
+
+        const cOpt = document.createElement('div');
+        cOpt.className = 'csel-opt';
+        cOpt.dataset.value = p._id;
+        cOpt.textContent = label;
+        panel.appendChild(cOpt);
+      });
+      panel.querySelectorAll('.csel-opt').forEach(cOpt => {
+        cOpt.addEventListener('click', () => {
+          panel.querySelectorAll('.csel-opt').forEach(o => o.classList.remove('selected'));
+          cOpt.classList.add('selected');
+          trigger.textContent = cOpt.textContent;
+          sel.value = cOpt.dataset.value;
+          panel.classList.remove('open');
+        });
+      });
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', (e) => {
+        if(!panel.contains(e.target) && e.target !== trigger){
+          panel.classList.remove('open');
+        }
       });
     } catch(err) {
       console.warn('Could not load packages for TV form:', err);
@@ -1739,6 +1789,11 @@
   document.getElementById('tvCancelBtn').addEventListener('click', () => {
     document.getElementById('tvMac').value = '';
     document.getElementById('tvPackage').value = '';
+    const tvTrigger = document.getElementById('tvPackageTrigger');
+    const tvPanel = document.getElementById('tvPackagePanel');
+    tvTrigger.textContent = 'Choose a package…';
+    tvPanel.querySelectorAll('.csel-opt').forEach(o => o.classList.remove('selected'));
+    tvPanel.querySelector('.csel-opt[data-value=""]').classList.add('selected');
     document.getElementById('tvName').value = '';
     document.getElementById('tvPhone').value = '';
     document.getElementById('tvStatus').className = 'form-status';
