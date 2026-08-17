@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Konnect Free — Satellite Internet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0a0908;
+    --void-2:#121009;
+    --panel:#18140d;
+    --panel-line: rgba(232,196,104,0.14);
+    --gold-bright:#e8c468;
+    --gold-pale:#f5e2b8;
+    --gold-deep:#a9781f;
+    --text-hi:#f5efe0;
+    --text-mid:#c9bfa4;
+    --text-lo:#8d8267;
+    --status:#7fc49a;
+    --danger:#d98a6a;
+    --radius-lg: 22px;
+    --radius-md: 16px;
+    --radius-sm: 11px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(120% 60% at 50% -10%, rgba(232,196,104,0.10), transparent 60%),
+      radial-gradient(90% 50% at 90% 0%, rgba(169,120,31,0.10), transparent 55%),
+      var(--void);
+    color:var(--text-hi);
+    font-family:'Manrope', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:rgba(232,196,104,0.3); color:#fff;}
+
+  .app{ max-width:480px; margin:0 auto; padding-bottom:64px; position:relative; }
+
+  /* ---------- HERO / SIGNATURE ORBIT ---------- */
+  .hero{
+    position:relative;
+    padding:38px 22px 30px;
+    overflow:hidden;
+    border-bottom:1px solid var(--panel-line);
+  }
+  .hero::before{
+    content:'';
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(232,196,104,0.07), transparent 70%);
+    pointer-events:none;
+  }
+  .orbit-wrap{
+    position:absolute;
+    top:-70px; right:-70px;
+    width:260px; height:260px;
+    pointer-events:none;
+  }
+  .orbit-ring{
+    position:absolute; inset:0;
+    border:1px solid rgba(232,196,104,0.22);
+    border-radius:50%;
+  }
+  .orbit-ring.r2{ inset:28px; border-color:rgba(232,196,104,0.14); animation: spin 26s linear infinite; }
+  .orbit-ring.r3{ inset:56px; border-color:rgba(232,196,104,0.09); animation: spin 40s linear infinite reverse; }
+  .orbit-dot{
+    position:absolute; width:7px; height:7px; border-radius:50%;
+    background: var(--gold-bright);
+    box-shadow: 0 0 12px 2px rgba(232,196,104,0.8);
+    top:50%; left:50%;
+    transform-origin: 0 0;
+    animation: orbit 26s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  @keyframes orbit{
+    from{ transform: translate(-50%,-50%) rotate(0deg) translateX(126px) rotate(0deg); }
+    to{ transform: translate(-50%,-50%) rotate(360deg) translateX(126px) rotate(-360deg); }
+  }
+
+  .brand-row{ display:flex; align-items:center; gap:12px; position:relative; z-index:1; }
+  .brand-mark{
+    width:42px; height:42px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(145deg, rgba(232,196,104,0.18), rgba(232,196,104,0.03));
+    border:1px solid var(--panel-line);
+  }
+  .brand-mark svg{ width:20px; height:20px; }
+  .brand-name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    letter-spacing:0.01em;
+    background: linear-gradient(120deg, var(--gold-pale), var(--gold-bright) 45%, var(--gold-deep));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .tagline{
+    margin-top:14px;
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:26px;
+    line-height:1.22;
+    max-width:280px;
+    color:var(--text-hi);
+    position:relative; z-index:1;
+  }
+  .tagline em{ font-style:italic; color:var(--gold-bright); }
+  .subtext{
+    margin-top:10px;
+    font-size:13.5px;
+    color:var(--text-mid);
+    max-width:300px;
+    line-height:1.5;
+  }
+  .status-pill{
+    margin-top:18px;
+    display:inline-flex; align-items:center; gap:8px;
+    padding:7px 13px;
+    border-radius:999px;
+    background:rgba(127,196,154,0.09);
+    border:1px solid rgba(127,196,154,0.28);
+    font-size:12px; font-weight:600; letter-spacing:0.03em;
+    color:var(--status);
+  }
+  .status-dot{ width:6px; height:6px; border-radius:50%; background:var(--status); box-shadow:0 0 8px 1px rgba(127,196,154,0.7); animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+  /* ---------- SECTION HEADERS ---------- */
+  .section{ padding:28px 22px 0; }
+  .section-eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--gold-deep);
+    margin-bottom:6px;
+  }
+  .section-title{
+    font-family:'Fraunces', serif;
+    font-size:20px; font-weight:600;
+    color:var(--text-hi);
+  }
+  .section-sub{
+    font-size:13px; color:var(--text-mid); margin-top:4px; line-height:1.5;
+  }
+
+  /* ---------- PACKAGE CARDS ---------- */
+  .grid{
+    margin-top:18px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .card{
+    position:relative;
+    grid-column: span 1;
+    background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius-md);
+    padding:16px 14px;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .25s ease;
+    cursor:pointer;
+    overflow:hidden;
+  }
+  .card:hover{
+    transform: translateY(-3px);
+    border-color: rgba(232,196,104,0.4);
+    box-shadow: 0 16px 34px -18px rgba(232,196,104,0.4);
+  }
+  .card:active{ transform: scale(0.97); }
+  .card.wide{ grid-column: span 2; }
+  .card.popular{
+    border-color: rgba(232,196,104,0.55);
+    box-shadow: 0 0 0 1px rgba(232,196,104,0.15), 0 14px 30px -14px rgba(232,196,104,0.35);
+  }
+  .ribbon{
+    position:absolute; top:-1px; right:14px;
+    background: linear-gradient(120deg, var(--gold-pale), var(--gold-bright));
+    color:#241c08;
+    font-size:10px; font-weight:800; letter-spacing:0.06em;
+    padding:5px 9px 6px;
+    border-radius:0 0 8px 8px;
+  }
+  .card-icon{
+    width:30px; height:30px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(232,196,104,0.10);
+    margin-bottom:12px;
+  }
+  .card-icon svg{ width:15px; height:15px; stroke:var(--gold-bright); }
+  .card-name{ font-size:13.5px; font-weight:700; color:var(--text-hi); }
+  .card-data{
+    font-family:'Fraunces', serif;
+    font-size:22px; font-weight:600; margin-top:10px;
+    color:var(--gold-bright);
+  }
+  .card-period{ font-size:11.5px; color:var(--text-lo); margin-top:2px; }
+  .card-price{ font-size:12px; color:var(--text-mid); margin-top:8px; font-weight:600; }
+  .buy-btn{
+    position:relative;
+    margin-top:12px; width:100%;
+    padding:10px 0;
+    border-radius:999px;
+    border:1px solid rgba(232,196,104,0.4);
+    background: linear-gradient(180deg, rgba(232,196,104,0.16), rgba(232,196,104,0.05));
+    color:var(--gold-pale);
+    font-family:'Manrope', sans-serif;
+    font-weight:700; font-size:12.5px; letter-spacing:0.02em;
+    cursor:pointer;
+    overflow:hidden;
+    transition: background .18s ease, color .18s ease, box-shadow .25s ease, border-color .2s ease;
+  }
+  .buy-btn::after{
+    content:'';
+    position:absolute; top:0; left:-60%; width:40%; height:100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-20deg);
+    transition: left .55s ease;
+  }
+  .buy-btn:hover{
+    border-color: rgba(232,196,104,0.75);
+    box-shadow: 0 0 18px -2px rgba(232,196,104,0.45);
+  }
+  .buy-btn:hover::after{ left:130%; }
+  .buy-btn:active{ background: linear-gradient(180deg, var(--gold-bright), var(--gold-deep)); color:#1a1305; }
+
+  /* ---------- STEPS ---------- */
+  .steps{ margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+  .step{
+    display:flex; gap:13px;
+    background:rgba(255,255,255,0.025);
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius-md);
+    padding:14px;
+  }
+  .step-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; color:var(--gold-bright);
+    width:22px; height:22px; flex-shrink:0;
+    border:1px solid rgba(232,196,104,0.35);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step-title{ font-size:13.5px; font-weight:700; color:var(--text-hi); }
+  .step-desc{ font-size:12.5px; color:var(--text-mid); margin-top:3px; line-height:1.5; }
+
+  /* ---------- SUPPORT ---------- */
+  .support{
+    margin-top:20px;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius-md);
+  }
+  .support-label{ font-size:11px; color:var(--text-lo); text-transform:uppercase; letter-spacing:0.08em; }
+  .support-val{ font-size:13px; color:var(--gold-bright); font-weight:600; margin-top:3px; }
+
+  .footnote{
+    margin:26px 22px 0; font-size:11px; color:var(--text-lo); line-height:1.6;
+  }
+
+  /* ---------- MODAL ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(6,5,3,0.72);
+    backdrop-filter: blur(3px);
+    display:flex; align-items:flex-end; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+    z-index:50;
+  }
+  .overlay.open{ opacity:1; pointer-events:auto; }
+  .sheet{
+    width:100%; max-width:480px;
+    background: linear-gradient(180deg, #1c170e, #120f09);
+    border:1px solid var(--panel-line);
+    border-bottom:none;
+    border-radius:24px 24px 0 0;
+    padding:22px 22px 30px;
+    transform: translateY(100%);
+    transition: transform .32s cubic-bezier(.2,.9,.25,1);
+  }
+  .overlay.open .sheet{ transform: translateY(0); }
+  .sheet-handle{ width:36px; height:4px; border-radius:2px; background:rgba(255,255,255,0.15); margin:0 auto 18px; }
+  .sheet-title{ font-family:'Fraunces', serif; font-size:19px; font-weight:600; }
+  .sheet-sub{ font-size:12.5px; color:var(--text-mid); margin-top:4px; margin-bottom:20px; }
+  .field{ margin-bottom:14px; }
+  .field label{
+    display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.06em;
+    color:var(--text-lo); margin-bottom:7px; font-weight:600;
+  }
+  .field input{
+    width:100%; padding:13px 14px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius-sm);
+    color:var(--text-hi);
+    font-family:'Manrope', sans-serif;
+    font-size:14px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .field input:focus{ border-color:var(--gold-bright); }
+  .field input::placeholder{ color:var(--text-lo); }
+  .field.mono input{ font-family:'IBM Plex Mono', monospace; letter-spacing:0.03em; }
+  .field-hint{ font-size:11px; color:var(--text-lo); margin-top:6px; line-height:1.5; }
+  .confirm-btn{
+    position:relative; overflow:hidden;
+    width:100%; padding:15px 0; margin-top:8px;
+    border:none; border-radius:999px;
+    background: linear-gradient(120deg, var(--gold-pale), var(--gold-bright) 55%, var(--gold-deep));
+    color:#1a1305; font-weight:800; font-size:14px;
+    font-family:'Manrope', sans-serif;
+    cursor:pointer;
+    transition: box-shadow .25s ease, transform .15s ease;
+  }
+  .confirm-btn::after{
+    content:'';
+    position:absolute; top:0; left:-60%; width:35%; height:100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+    transform: skewX(-20deg);
+    transition: left .55s ease;
+  }
+  .confirm-btn:hover{ box-shadow: 0 10px 26px -10px rgba(232,196,104,0.6); }
+  .confirm-btn:hover::after{ left:130%; }
+  .confirm-btn:active{ transform:scale(0.98); }
+  .mpesa-badge{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin-top:14px; padding:8px 14px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.02);
+    border:1px solid var(--panel-line, rgba(232,196,104,0.14));
+  }
+  .mpesa-badge-caption{ font-size:10.5px; color:var(--text-lo); letter-spacing:0.03em; }
+  .mpesa-badge-pill{
+    display:inline-flex; align-items:center; gap:5px;
+    background:#43b02a; color:#fff;
+    padding:3px 10px 3px 7px; border-radius:6px;
+    font-family:'Manrope', sans-serif; font-weight:800; font-size:12.5px;
+    letter-spacing:0.01em; line-height:1.4;
+  }
+  .mpesa-badge-pill svg{ flex-shrink:0; }
+  .close-x{
+    position:absolute; top:20px; right:20px;
+    width:30px; height:30px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.05);
+    color:var(--text-mid);
+    font-size:16px;
+    cursor:pointer;
+  }
+  .sheet-summary{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 14px; margin-bottom:18px;
+    background:rgba(232,196,104,0.06);
+    border:1px solid rgba(232,196,104,0.2);
+    border-radius:var(--radius-sm);
+  }
+  .sheet-summary-name{ font-size:13px; font-weight:700; color:var(--gold-pale); }
+  .sheet-summary-meta{ font-size:11.5px; color:var(--text-mid); margin-top:2px; }
+  .sheet-summary-price{ font-family:'Fraunces', serif; font-size:17px; color:var(--gold-bright); font-weight:600; }
+
+  /* ---------- PAYMENT STATE PANELS ---------- */
+  .pay-panel{ text-align:center; padding:14px 4px 6px; }
+
+  .pay-spinner-wrap{ width:88px; height:88px; margin:6px auto 22px; position:relative; }
+  .pay-spinner-ring{
+    position:absolute; inset:0; border-radius:50%;
+    border:2px solid rgba(232,196,104,0.15);
+    border-top-color: var(--gold-bright);
+    animation: spin 1.1s linear infinite;
+  }
+  .pay-spinner-icon{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  }
+  .pay-spinner-icon svg{ width:30px; height:30px; }
+
+  .pay-title{ font-family:'Fraunces', serif; font-size:18px; font-weight:600; color:var(--text-hi); margin-bottom:8px; }
+  .pay-sub{ font-size:13px; color:var(--text-mid); line-height:1.6; max-width:280px; margin:0 auto 22px; }
+  .pay-countdown{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--gold-bright);
+    margin-bottom:20px;
+  }
+
+  .result-badge{
+    width:64px; height:64px; margin:6px auto 20px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+  }
+  .result-badge.ok{ background: rgba(127,196,154,0.12); border:1px solid rgba(127,196,154,0.4); }
+  .result-badge.fail{ background: rgba(217,138,106,0.12); border:1px solid rgba(217,138,106,0.4); }
+  .result-badge svg{ width:28px; height:28px; }
+
+  .receipt{
+    text-align:left;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius-sm);
+    padding:14px 16px; margin-bottom:20px;
+  }
+  .receipt-row{ display:flex; justify-content:space-between; font-size:12.5px; padding:6px 0; }
+  .receipt-row span:first-child{ color:var(--text-lo); }
+  .receipt-row span:last-child{ color:var(--text-hi); font-weight:600; }
+  .receipt-row + .receipt-row{ border-top:1px solid var(--panel-line); }
+
+  .step-panel{ display:none; }
+  .step-panel.active{ display:block; }
+
+  /* ---------- TOP UTILITY LINK ---------- */
+  .paid-link{
+    position:absolute; top:20px; right:22px; z-index:2;
+    font-size:11.5px; font-weight:700; color:var(--gold-bright);
+    text-decoration:none; text-align:right; line-height:1.4;
+    cursor:pointer;
+  }
+  .paid-link span{ display:block; color:var(--text-lo); font-weight:500; font-size:10.5px; }
+
+  /* ---------- MAC BAR ---------- */
+  .mac-bar{
+    margin:16px 22px 0;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:11px 14px;
+    background:rgba(255,255,255,0.025);
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius-sm);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+  }
+  .mac-bar-label{ color:var(--text-lo); }
+  .mac-bar-val{ color:var(--gold-bright); font-weight:500; }
+
+  /* ---------- FORM CARDS (voucher / reconnect / login / TV) ---------- */
+  .form-card{
+    margin-top:16px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius-md);
+    padding:18px;
+  }
+  .form-card-title{ font-family:'Fraunces', serif; font-size:16.5px; font-weight:600; color:var(--text-hi); }
+  .form-card-sub{ font-size:12px; color:var(--text-mid); margin-top:4px; margin-bottom:16px; line-height:1.5; }
+  .form-card .field{ margin-bottom:12px; }
+  .form-card .field:last-of-type{ margin-bottom:0; }
+  .form-row{ display:flex; gap:10px; }
+  .form-row .field{ flex:1; }
+  textarea.mfield{
+    width:100%; padding:12px 14px; min-height:76px; resize:vertical;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius-sm);
+    color:var(--text-hi);
+    font-family:'Manrope', sans-serif; font-size:13.5px;
+    outline:none;
+  }
+  textarea.mfield:focus{ border-color:var(--gold-bright); }
+  .ghost-btn{
+    width:100%; margin-top:14px; padding:12px 0;
+    border-radius:999px;
+    border:1px solid rgba(232,196,104,0.35);
+    background:transparent;
+    color:var(--gold-bright);
+    font-family:'Manrope', sans-serif; font-weight:700; font-size:13px;
+    cursor:pointer;
+    transition: background .2s ease, border-color .2s ease, box-shadow .25s ease;
+  }
+  .ghost-btn:hover{
+    border-color: rgba(232,196,104,0.7);
+    background: rgba(232,196,104,0.06);
+    box-shadow: 0 0 14px -4px rgba(232,196,104,0.35);
+  }
+  .ghost-btn:active{ background:rgba(232,196,104,0.1); }
+  .fill-btn{
+    position:relative; overflow:hidden;
+    width:100%; margin-top:14px; padding:13px 0;
+    border:none; border-radius:999px;
+    background: linear-gradient(120deg, var(--gold-pale), var(--gold-bright) 55%, var(--gold-deep));
+    color:#1a1305; font-weight:800; font-size:13.5px;
+    font-family:'Manrope', sans-serif;
+    cursor:pointer;
+    transition: box-shadow .25s ease, transform .15s ease;
+  }
+  .fill-btn::after{
+    content:'';
+    position:absolute; top:0; left:-60%; width:35%; height:100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+    transform: skewX(-20deg);
+    transition: left .55s ease;
+  }
+  .fill-btn:hover{ box-shadow: 0 10px 24px -10px rgba(232,196,104,0.6); }
+  .fill-btn:hover::after{ left:130%; }
+  .fill-btn:active{ transform:scale(0.98); }
+  .fill-btn:disabled, .ghost-btn:disabled{ opacity:0.6; cursor:default; }
+  .troubleshoot-btn{
+    width:100%; margin-top:16px; padding:12px 0;
+    border-radius:999px; border:1px dashed rgba(232,196,104,0.3);
+    background:rgba(232,196,104,0.05);
+    color:var(--text-mid);
+    font-family:'Manrope', sans-serif; font-weight:600; font-size:12.5px;
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    cursor:pointer;
+    transition: border-color .2s ease, color .2s ease, background .2s ease;
+  }
+  .troubleshoot-btn:hover{
+    border-color: rgba(232,196,104,0.55);
+    color: var(--gold-pale);
+    background: rgba(232,196,104,0.09);
+  }
+  .divider{
+    display:flex; align-items:center; gap:12px;
+    margin:22px 0 4px; color:var(--text-lo); font-size:11px;
+    text-transform:uppercase; letter-spacing:0.08em;
+  }
+  .divider::before, .divider::after{ content:''; flex:1; height:1px; background:var(--panel-line); }
+
+  .collapsible summary{
+    font-size:12.5px; font-weight:600; color:var(--gold-bright);
+    cursor:pointer; list-style:none; margin-top:12px;
+  }
+  .collapsible summary::-webkit-details-marker{ display:none; }
+  .collapsible summary::before{ content:'▸ '; }
+  .collapsible[open] summary::before{ content:'▾ '; }
+  .collapsible p{ font-size:12px; color:var(--text-mid); margin-top:8px; line-height:1.6; }
+
+  .device-note{
+    margin-top:10px; padding:11px 13px;
+    background:rgba(217,138,106,0.08);
+    border:1px solid rgba(217,138,106,0.25);
+    border-radius:var(--radius-sm);
+    font-size:11.5px; color:#e0ab93; line-height:1.5;
+  }
+  .device-note b{ color:#eec3ae; }
+
+  .form-status{
+    margin-top:12px; padding:10px 13px;
+    border-radius:var(--radius-sm);
+    font-size:12px; line-height:1.5; display:none;
+  }
+  .form-status.show{ display:block; }
+  .form-status.info{ background:rgba(232,196,104,0.08); border:1px solid rgba(232,196,104,0.25); color:var(--gold-pale); }
+  .form-status.ok{ background:rgba(127,196,154,0.1); border:1px solid rgba(127,196,154,0.3); color:var(--status); }
+  .form-status.fail{ background:rgba(217,138,106,0.08); border:1px solid rgba(217,138,106,0.25); color:#e0ab93; }
+
+  /* ---------- FOOTER ---------- */
+  .site-footer{
+    margin-top:34px;
+    padding:30px 22px 26px;
+    background: linear-gradient(180deg, rgba(232,196,104,0.05), transparent);
+    border-top:1px solid var(--panel-line);
+  }
+  .footer-brand{ font-family:'Fraunces', serif; font-size:17px; font-weight:600; color:var(--gold-bright); margin-bottom:6px; }
+  .footer-powered{ font-size:11.5px; color:var(--text-lo); line-height:1.6; margin-bottom:22px; }
+  .footer-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  .footer-col-title{ font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-lo); margin-bottom:10px; font-weight:700; }
+  .footer-col a, .footer-col div{ display:block; font-size:13px; color:var(--text-mid); margin-bottom:9px; text-decoration:none; transition: color .18s ease; }
+  .footer-col a:hover{ color: var(--gold-bright); }
+  .footer-social{ display:flex; gap:10px; margin-top:6px; }
+  .footer-social a{
+    width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--panel-line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--gold-bright); font-size:13px;
+    transition: transform .2s ease, border-color .2s ease, box-shadow .25s ease;
+  }
+  .footer-social a:hover{
+    transform: translateY(-3px);
+    border-color: rgba(232,196,104,0.6);
+    box-shadow: 0 8px 18px -8px rgba(232,196,104,0.5);
+  }
+  .footer-bottom{
+    margin-top:26px; padding-top:18px; border-top:1px solid var(--panel-line);
+    font-size:11px; color:var(--text-lo); text-align:center;
+  }
+
+  .call-fab{
+    position:fixed; bottom:22px; right:22px; z-index:40;
+    width:54px; height:54px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg, var(--gold-pale), var(--gold-bright));
+    box-shadow: 0 10px 26px -8px rgba(232,196,104,0.55);
+    cursor:pointer;
+    transition: transform .2s ease, box-shadow .25s ease;
+  }
+  .call-fab:hover{ transform: scale(1.08); box-shadow: 0 14px 32px -8px rgba(232,196,104,0.7); }
+  .call-fab:active{ transform: scale(0.95); }
+  .call-fab svg{ width:22px; height:22px; }
+
+  /* ---------- SPLASH ---------- */
+  .splash{
+    position:fixed; inset:0; z-index:100;
+    display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(120% 70% at 50% 20%, rgba(232,196,104,0.14), transparent 60%),
+      var(--void);
+    transition: opacity .5s ease, visibility .5s ease;
+  }
+  .splash.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  .splash-card{
+    width:min(300px, 78vw);
+    text-align:center;
+  }
+  .splash-ring-wrap{
+    position:relative;
+    width:132px; height:132px;
+    margin:0 auto 22px;
+  }
+  .splash-ring{
+    position:absolute; inset:0; border-radius:50%;
+    border:1px solid rgba(232,196,104,0.25);
+  }
+  .splash-ring.s2{ inset:14px; border-color:rgba(232,196,104,0.4); animation: spin 3.6s linear infinite; border-top-color:var(--gold-bright); }
+  .splash-ring.s3{ inset:30px; border-color:rgba(232,196,104,0.15); animation: spin 5.2s linear infinite reverse; }
+  .splash-mark{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .splash-mark svg{ width:34px; height:34px; }
+  .splash-greeting{
+    font-family:'Fraunces', serif; font-weight:600; font-size:19px;
+    color:var(--text-hi); margin-bottom:6px;
+  }
+  .splash-sub{
+    font-family:'Fraunces', serif; font-style:italic; font-weight:500;
+    font-size:14px; color:var(--gold-bright); margin-bottom:4px;
+  }
+  .splash-line{ font-size:11.5px; color:var(--text-lo); margin-bottom:26px; }
+  .splash-bar-track{
+    width:100%; height:3px; border-radius:2px;
+    background:rgba(255,255,255,0.06); overflow:hidden;
+  }
+  .splash-bar-fill{
+    height:100%; width:0%;
+    background: linear-gradient(90deg, var(--gold-deep), var(--gold-bright), var(--gold-pale));
+    border-radius:2px;
+    animation: fillbar 9.5s ease-in-out forwards;
+  }
+  @keyframes fillbar{ from{ width:0%; } to{ width:100%; } }
+
+  /* ---------- SUPPORT WIDGET ---------- */
+  .chat-fab{
+    position:fixed; bottom:22px; right:86px; z-index:40;
+    width:54px; height:54px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+    border:1px solid var(--panel-line);
+    backdrop-filter: blur(10px);
+    cursor:pointer;
+    transition: transform .2s ease, border-color .2s ease, box-shadow .25s ease;
+  }
+  .chat-fab:hover{
+    transform: scale(1.08);
+    border-color: rgba(232,196,104,0.6);
+    box-shadow: 0 10px 24px -10px rgba(232,196,104,0.4);
+  }
+  .chat-fab:active{ transform: scale(0.95); }
+  .chat-fab svg{ width:21px; height:21px; }
+  .support-header{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:4px;
+  }
+  .support-header-left{ display:flex; align-items:center; gap:10px; }
+  .support-online{
+    display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--status); margin-bottom:16px;
+  }
+  .support-online span{ width:6px; height:6px; border-radius:50%; background:var(--status); }
+  .faq-item{
+    border-bottom:1px solid var(--panel-line);
+  }
+  .faq-item:last-of-type{ border-bottom:none; }
+  .faq-item summary{
+    padding:13px 2px;
+    font-size:13px; font-weight:600; color:var(--text-hi);
+    cursor:pointer; list-style:none;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item summary::after{ content:'▾'; color:var(--gold-bright); font-size:12px; }
+  .faq-item[open] summary::after{ content:'▴'; }
+  .faq-item p{ font-size:12px; color:var(--text-mid); padding:0 2px 14px; line-height:1.6; }
+  .faq-en{ display:block; }
+  .faq-sw{ display:block; color:var(--text-lo); font-style:italic; margin-top:3px; }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, .card:focus-visible{
+    outline: 2px solid var(--gold-bright);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .orbit-ring, .orbit-dot, .status-dot, .splash-ring.s2, .splash-ring.s3, .buy-btn::after, .fill-btn::after, .confirm-btn::after{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="splash" id="splash">
+  <div class="splash-card">
+    <div class="splash-ring-wrap">
+      <div class="splash-ring"></div>
+      <div class="splash-ring s2"></div>
+      <div class="splash-ring s3"></div>
+      <div class="splash-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#e8c468" stroke-width="1.6"><path d="M4 11a8 8 0 0 1 8-8"/><path d="M4 11a8 8 0 0 0 8 8"/><circle cx="4" cy="11" r="1.4" fill="#e8c468" stroke="none"/><path d="M12 3l6 6-3 3-6-6z"/><path d="M9 15l-4 4"/></svg>
+      </div>
+    </div>
+    <div class="splash-greeting" id="splashGreeting">Good morning</div>
+    <div class="splash-sub">Konnect Free is warming up the dish</div>
+    <div class="splash-line">Karibu — internet safi, bila stress</div>
+    <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="paid-link" id="paidLink">Already paid?<span>Click here</span></div>
+    <div class="orbit-wrap">
+      <div class="orbit-ring r2"></div>
+      <div class="orbit-ring r3"></div>
+      <div class="orbit-dot"></div>
+    </div>
+
+    <div class="brand-row">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#e8c468" stroke-width="1.6"><path d="M4 11a8 8 0 0 1 8-8"/><path d="M4 11a8 8 0 0 0 8 8"/><circle cx="4" cy="11" r="1.4" fill="#e8c468" stroke="none"/><path d="M12 3l6 6-3 3-6-6z"/><path d="M9 15l-4 4"/></svg>
+      </div>
+      <div class="brand-name">Konnect Free</div>
+    </div>
+
+    <div class="tagline">Your own <em>satellite link</em>, shared with the neighborhood.</div>
+    <div class="subtext">Local internet from our Starlink dish — pick a plan, connect your device, and you're online.</div>
+
+    <div class="status-pill"><span class="status-dot"></span> Dish online — signal strong</div>
+  </div>
+
+  <!-- MAC BAR -->
+  <div class="mac-bar">
+    <span class="mac-bar-label">Your MAC address</span>
+    <span class="mac-bar-val" id="myMac">Detecting…</span>
+  </div>
+
+  <!-- GATEWAY/ROUTER DETECT BAR — cosmetic only, tailors troubleshooting
+       tips to the hotspot gateway that redirected the user here. Never
+       used for pricing, auth, or anything security-relevant. -->
+  <div class="mac-bar" id="routerBar" style="display:none;">
+    <span class="mac-bar-label">Connection</span>
+    <span class="mac-bar-val" id="routerTypeVal">—</span>
+  </div>
+  <div class="field-hint" id="routerPickerWrap" style="display:none; padding:0 4px 12px;">
+    Having trouble? Tell us what kind of connection this is so we can help faster:
+    <select id="routerPicker" style="margin-left:6px;">
+      <option value="">Choose…</option>
+      <option value="mikrotik">MikroTik hotspot</option>
+      <option value="chilli">Standard hotspot login (CoovaChilli/other)</option>
+      <option value="home_router">Home router (TP-Link, Safaricom Home WiFi, etc.)</option>
+      <option value="unsure">Not sure</option>
+    </select>
+  </div>
+
+  <!-- PACKAGES -->
+  <div class="section">
+    <div class="section-eyebrow">Data packages</div>
+    <div class="section-title">Choose your plan</div>
+    <div class="section-sub">Every plan runs off the same dish — pick by how long you need to stay connected.</div>
+
+    <div class="grid" id="packageGrid">
+      <div class="card" data-name="Daily" data-data="10GB" data-period="24 Hours" data-price="KSh 180">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div class="card-name">Daily</div>
+        <div class="card-data">10GB</div>
+        <div class="card-period">24 hours</div>
+        <div class="card-price">KSh 180</div>
+        <button class="buy-btn">Buy now</button>
+      </div>
+
+      <div class="card" data-name="Weekly" data-data="12GB" data-period="1 Week" data-price="KSh 200">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18"/><path d="M8 3v3M16 3v3"/></svg></div>
+        <div class="card-name">Weekly</div>
+        <div class="card-data">12GB</div>
+        <div class="card-period">1 week</div>
+        <div class="card-price">KSh 200</div>
+        <button class="buy-btn">Buy now</button>
+      </div>
+
+      <div class="card popular" data-name="Extended" data-data="18GB" data-period="3 Weeks" data-price="KSh 450">
+        <div class="ribbon">Popular</div>
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5z"/></svg></div>
+        <div class="card-name">Extended</div>
+        <div class="card-data">18GB</div>
+        <div class="card-period">3 weeks</div>
+        <div class="card-price">KSh 450</div>
+        <button class="buy-btn">Buy now</button>
+      </div>
+
+      <div class="card" data-name="Monthly" data-data="30GB" data-period="1 Month" data-price="KSh 900">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l7-3.5"/></svg></div>
+        <div class="card-name">Monthly</div>
+        <div class="card-data">30GB</div>
+        <div class="card-period">1 month</div>
+        <div class="card-price">KSh 900</div>
+        <button class="buy-btn">Buy now</button>
+      </div>
+
+      <div class="card wide" data-name="2 Months" data-data="Unlimited" data-period="2 Months" data-price="KSh 1,600">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 12c0-3 2-5 5-5s5 2 5 5-2 5-5 5-5-2-5-5z"/><path d="M2 12h2M20 12h2"/></svg></div>
+        <div class="card-name">2 Months — Unlimited</div>
+        <div class="card-data">Unlimited</div>
+        <div class="card-period">2 months</div>
+        <div class="card-price">KSh 1,600</div>
+        <button class="buy-btn">Buy now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section">
+    <div class="section-eyebrow">Getting online</div>
+    <div class="section-title">How it works</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Pick a plan</div>
+          <div class="step-desc">Choose the package that matches how long and how much data you need.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Pay with M-Pesa</div>
+          <div class="step-desc">Enter your name, phone number, and device MAC address, then approve the M-Pesa prompt.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">We add your device</div>
+          <div class="step-desc">Your MAC address is added to the dish's network so your device is recognized automatically.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-title">Connect to Konnect Free WiFi</div>
+          <div class="step-desc">Join the network from your WiFi settings — you're online within seconds of payment.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALREADY HAVE A PACKAGE -->
+  <div class="section" id="loginSection">
+    <div class="section-eyebrow">Returning customer</div>
+    <div class="section-title">Already have an active package?</div>
+
+    <div class="form-card">
+      <div class="form-card-title">Paste your M-Pesa message</div>
+      <div class="form-card-sub">Paid but not connected? Paste the full confirmation SMS and we'll verify it. Just need to reconnect after being disconnected? Use the "Reconnect a device" section below instead — it's faster.</div>
+      <div class="field">
+        <label>Phone number (so we can reach you)</label>
+        <input type="tel" id="mpesaMsgPhone" placeholder="e.g. 254712345678">
+      </div>
+      <div class="field">
+        <label>M-Pesa message</label>
+        <textarea class="mfield" id="mpesaMsg" placeholder="Paste your full M-Pesa confirmation message here"></textarea>
+      </div>
+      <button class="ghost-btn" id="mpesaMsgBtn">Submit M-Pesa message</button>
+      <div class="form-status" id="mpesaMsgStatus"></div>
+    </div>
+  </div>
+
+  <!-- VOUCHER -->
+  <div class="section" id="voucherSection">
+    <div class="section-eyebrow">Voucher</div>
+    <div class="section-title">Have a voucher code?</div>
+    <div class="form-card">
+      <div class="form-row">
+        <div class="field">
+          <label>Voucher code</label>
+          <input type="text" id="voucherCode" placeholder="e.g. V123456">
+        </div>
+      </div>
+      <div class="field">
+        <label>Phone number</label>
+        <input type="tel" id="voucherPhone" placeholder="e.g. 254712345678">
+      </div>
+      <button class="fill-btn" id="voucherBtn">Activate voucher</button>
+      <div class="form-status" id="voucherStatus"></div>
+    </div>
+  </div>
+
+  <!-- RECONNECT -->
+  <div class="section" id="reconnectSection">
+    <div class="section-eyebrow">Lost connection</div>
+    <div class="section-title">Reconnect an existing package</div>
+    <div class="form-card">
+      <div class="field">
+        <label>Phone number or voucher code</label>
+        <input type="text" id="reconnectId" placeholder="e.g. 254712345678 or V123456">
+      </div>
+      <button class="fill-btn" id="reconnectBtn">Reconnect</button>
+      <div class="form-status" id="reconnectStatus"></div>
+      <button class="troubleshoot-btn" id="troubleshootBtn">🛠 Force reconnection / troubleshoot</button>
+    </div>
+  </div>
+
+  <!-- TV / OTHER DEVICE -->
+  <div class="section" id="tvSection">
+    <div class="section-eyebrow">Devices without a browser</div>
+    <div class="section-title">Connect your TV or other device</div>
+    <div class="section-sub">Only use this if your device can't open this sign-in page on its own — most phones and laptops don't need it.</div>
+
+    <div class="form-card">
+      <div class="field">
+        <label>Device MAC address</label>
+        <input type="text" placeholder="e.g. AA:BB:CC:DD:EE:FF" id="tvMac">
+      </div>
+      <details class="collapsible">
+        <summary>How do I find my TV's MAC address?</summary>
+        <p>Open your TV's network or WiFi settings menu — the MAC address (sometimes called "device address") is usually listed there. On most smart TVs: Settings → Network → Network Status → View Additional Settings.</p>
+      </details>
+      <div class="field" style="margin-top:14px;">
+        <label>Select package</label>
+        <select id="tvPackage"><option value="">Choose a package…</option></select>
+      </div>
+      <div class="device-note"><b>One device per package.</b> Each package works on a single device only — don't buy one package to share across several devices.</div>
+      <div class="field" style="margin-top:14px;">
+        <label>Your name</label>
+        <input type="text" id="tvName" placeholder="e.g. Jane">
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <label>Phone number (M-Pesa)</label>
+        <input type="tel" id="tvPhone" placeholder="e.g. 0712345678">
+      </div>
+      <div class="form-row" style="margin-top:16px;">
+        <button class="fill-btn" id="tvBindBtn" style="margin-top:0;">Bind &amp; pay</button>
+        <button class="ghost-btn" id="tvCancelBtn" style="margin-top:0;">Cancel</button>
+      </div>
+      <div class="form-status" id="tvStatus"></div>
+    </div>
+  </div>
+
+  <!-- SUPPORT -->
+  <div class="section">
+    <div class="support">
+      <div>
+        <div class="support-label">Need help?</div>
+        <div class="support-val">Message us anytime</div>
+      </div>
+      <div class="card-icon" style="margin:0;"><svg viewBox="0 0 24 24" fill="none" stroke="#e8c468" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+    </div>
+    <div class="footnote">Konnect Free is an independent local network powered by a privately owned Starlink dish. Coverage is limited to our local WiFi range, not nationwide satellite coverage.<br><br>Starlink® is a trademark of Space Exploration Technologies Corp. (SpaceX). Konnect Free is an independent local reseller of internet access and is not affiliated with, sponsored by, or endorsed by SpaceX or Starlink Services, LLC.</div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="site-footer">
+    <div class="footer-brand">Konnect Free</div>
+    <div class="footer-powered">Your local internet, powered by a privately owned Starlink dish.</div>
+
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-col-title">Contact us</div>
+        <a href="https://wa.me/254728772286" target="_blank">WhatsApp: wa.me/0728772286</a>
+        <a href="tel:0728772286">Phone: 0728772286</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Quick links</div>
+        <a href="#">About us</a>
+        <a href="#">Our services</a>
+        <a href="#">FAQ</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+
+    <div class="footer-col-title" style="margin-top:22px;">Follow us</div>
+    <div class="footer-social">
+      <a href="#" aria-label="WhatsApp">W</a>
+      <a href="#" aria-label="Instagram">I</a>
+      <a href="#" aria-label="Facebook">F</a>
+    </div>
+
+    <div class="footer-bottom">© 2026 Konnect Free. All rights reserved.</div>
+  </div>
+
+</div>
+
+<div class="call-fab" id="callFab" title="Call support">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#1a1305" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+</div>
+
+<div class="chat-fab" id="chatFab" title="WiFi support">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#e8c468" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</div>
+
+<!-- SUPPORT PANEL -->
+<div class="overlay" id="supportOverlay">
+  <div class="sheet">
+    <div class="close-x" id="closeSupport">✕</div>
+    <div class="sheet-handle"></div>
+    <div class="support-header">
+      <div class="support-header-left">
+        <div class="card-icon" style="margin:0;"><svg viewBox="0 0 24 24" fill="none" stroke="#e8c468" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div class="sheet-title" style="font-size:17px;">WiFi Support</div>
+      </div>
+    </div>
+    <div class="support-online"><span></span> Tuko online — we're here</div>
+
+    <details class="faq-item">
+      <summary>WiFi won't connect</summary>
+      <p><span class="faq-en">Restart WiFi on your device, forget the "Konnect Free" network, then rejoin and reload this page.</span><span class="faq-sw">WiFi yangu haitafti — zima na uwashe WiFi, kisha ujiunge tena.</span></p>
+    </details>
+    <details class="faq-item">
+      <summary>Voucher expired</summary>
+      <p><span class="faq-en">Your voucher's data or time has run out — buy a new package or top up above.</span><span class="faq-sw">Voucher yangu imekwisha — nunua kifurushi kipya hapo juu.</span></p>
+    </details>
+    <details class="faq-item">
+      <summary>Internet is slow</summary>
+      <p><span class="faq-en">Speed can dip when the dish has many connected devices at once — try moving closer to the router or reconnecting.</span><span class="faq-sw">Intaneti ni polepole — jaribu kusogea karibu na router au ku-reconnect.</span></p>
+    </details>
+    <details class="faq-item">
+      <summary>Login page not showing</summary>
+      <p><span class="faq-en">Open any website in your browser (e.g. google.com) — the sign-in page should pop up automatically. If not, use the "Connect your TV/Device" form above.</span><span class="faq-sw">Ukurasa wa login hauonyeshi — fungua tovuti yoyote kwenye kivinjari chako.</span></p>
+    </details>
+    <details class="faq-item">
+      <summary>Paid but no internet</summary>
+      <p><span class="faq-en">Paste your M-Pesa confirmation message in the "Already have an active package?" section above and we'll verify it manually.</span><span class="faq-sw">Nimelipa lakini sina intaneti — bandika ujumbe wako wa M-Pesa hapo juu.</span></p>
+    </details>
+
+    <a href="https://wa.me/254728772286" target="_blank" class="fill-btn" style="display:block; text-align:center; text-decoration:none; box-sizing:border-box;">💬 Chat na Support / Start Chat</a>
+  </div>
+</div>
+
+<!-- BUY MODAL -->
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <div class="close-x" id="closeSheet">✕</div>
+    <div class="sheet-handle"></div>
+
+    <!-- STEP 1: FORM -->
+    <div class="step-panel active" id="stepForm">
+      <div class="sheet-title">Connect your device</div>
+      <div class="sheet-sub">We'll add your device to the network once payment is confirmed.</div>
+
+      <div class="sheet-summary">
+        <div>
+          <div class="sheet-summary-name" id="sumName">Extended</div>
+          <div class="sheet-summary-meta" id="sumMeta">18GB · 3 weeks</div>
+        </div>
+        <div class="sheet-summary-price" id="sumPrice">KSh 450</div>
+      </div>
+
+      <div class="field">
+        <label>Your name</label>
+        <input type="text" id="custName" placeholder="e.g. Wanjiru Kamau" autocomplete="name">
+      </div>
+      <div class="field">
+        <label>M-Pesa phone number</label>
+        <input type="tel" id="custPhone" placeholder="07XX XXX XXX" autocomplete="tel">
+      </div>
+      <div class="field mono">
+        <label>Device MAC address</label>
+        <input type="text" id="custMac" placeholder="AA:BB:CC:DD:EE:FF" maxlength="17">
+        <div class="field-hint" id="macHint">Find this in your phone's WiFi settings under "MAC address" or "Device address" — used only to connect your device to our network.</div>
+      </div>
+
+      <button class="confirm-btn" id="confirmBtn">Pay &amp; connect device</button>
+      <div class="mpesa-badge">
+        <span class="mpesa-badge-caption">Payments powered by</span>
+        <span class="mpesa-badge-pill">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 18h4"/></svg>
+          M-PESA
+        </span>
+      </div>
+    </div>
+
+    <!-- STEP 2: PAYMENT PENDING -->
+    <div class="step-panel" id="stepPending">
+      <div class="pay-panel">
+        <div class="pay-spinner-wrap">
+          <div class="pay-spinner-ring"></div>
+          <div class="pay-spinner-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#e8c468" stroke-width="1.6"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 18h4"/></svg>
+          </div>
+        </div>
+        <div class="pay-title">Check your phone</div>
+        <div class="pay-sub">We've sent an M-Pesa prompt to <span id="pendingPhone">your number</span>. Enter your PIN to approve <span id="pendingAmount">KSh 450</span>.</div>
+        <div class="pay-countdown" id="payCountdown">Waiting for confirmation… 60s</div>
+        <div class="mpesa-badge">
+          <span class="mpesa-badge-pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10 18h4"/></svg>
+            M-PESA
+          </span>
+        </div>
+        <button class="ghost-btn" id="cancelPending">Cancel</button>
+      </div>
+    </div>
+
+    <!-- STEP 2.5: CONNECTING TO STARLINK -->
+    <div class="step-panel" id="stepConnecting">
+      <div class="pay-panel">
+        <div class="pay-spinner-wrap">
+          <div class="pay-spinner-ring"></div>
+          <div class="pay-spinner-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#e8c468" stroke-width="1.6"><path d="M4 11a8 8 0 0 1 8-8"/><path d="M4 11a8 8 0 0 0 8 8"/><circle cx="4" cy="11" r="1.4" fill="#e8c468" stroke="none"/><path d="M12 3l6 6-3 3-6-6z"/><path d="M9 15l-4 4"/></svg>
+          </div>
+        </div>
+        <div class="pay-title">Payment confirmed</div>
+        <div class="pay-sub">Connecting you to Starlink — please wait while we add your device to the dish's network.</div>
+        <div class="pay-countdown" id="connectingStatus">Binding device…</div>
+      </div>
+    </div>
+
+    <!-- STEP 3: SUCCESS -->
+    <div class="step-panel" id="stepSuccess">
+      <div class="pay-panel">
+        <div class="result-badge ok">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#7fc49a" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <div class="pay-title">You're connected</div>
+        <div class="pay-sub">Payment confirmed and your device has been added to the network.</div>
+        <div class="receipt">
+          <div class="receipt-row"><span>Package</span><span id="rcptPackage">Extended · 18GB</span></div>
+          <div class="receipt-row"><span>Amount paid</span><span id="rcptAmount">KSh 450</span></div>
+          <div class="receipt-row"><span>M-Pesa code</span><span id="rcptCode">—</span></div>
+          <div class="receipt-row"><span>Device</span><span id="rcptMac">—</span></div>
+        </div>
+        <button class="confirm-btn" id="doneBtn">Done</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: FAILURE -->
+    <div class="step-panel" id="stepFail">
+      <div class="pay-panel">
+        <div class="result-badge fail">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#d98a6a" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </div>
+        <div class="pay-title" id="failTitle">Payment didn't go through</div>
+        <div class="pay-sub" id="failReason">You may have cancelled the M-Pesa prompt, or it timed out. No money was deducted.</div>
+        <button class="confirm-btn" id="retryBtn">Try again</button>
+        <button class="ghost-btn" id="failSupportBtn">Contact support instead</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /*
+   * ---------------------------------------------------------------
+   * BACKEND CONFIG — the frontend now ships as a static asset served
+   * BY the backend (see backend/src/app.js), so this is same-origin.
+   * A relative path means it works on localhost, staging, and prod
+   * without editing this file per-deploy.
+   * ---------------------------------------------------------------
+   */
+  const API_BASE = '/api';
+
+  async function apiFetch(path, options = {}){
+    const res = await fetch(API_BASE + path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options,
+    });
+    let data = null;
+    try { data = await res.json(); } catch(e) { /* no body */ }
+    if(!res.ok){
+      const msg = (data && data.error) || `Request failed (${res.status})`;
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  /*
+   * ---------------------------------------------------------------
+   * ROUTER-SUPPLIED IDENTITY
+   *
+   * Real hotspot gateways (MikroTik, Chillispot/CoovaChilli, etc.)
+   * redirect a client to this login page with query params carrying
+   * that client's MAC (and often IP, link-login-only URL, etc), e.g:
+   *   https://yourportal.com/?mac=AA:BB:CC:DD:EE:FF&ip=10.5.50.12
+   * A browser can NEVER read a device's real MAC address itself —
+   * it only exists if the router puts it in the URL. So: read it
+   * from the query string if present, and only fall back to a
+   * manual text field if it's missing (e.g. someone opened this
+   * page directly, off the hotspot network).
+   * ---------------------------------------------------------------
+   */
+  function getRouterParam(names){
+    const params = new URLSearchParams(window.location.search);
+    for(const n of names){
+      const v = params.get(n);
+      if(v) return v;
+    }
+    return null;
+  }
+  const routerMac = getRouterParam(['mac','client-mac','mac-address','device-mac']);
+  const myMacEl = document.getElementById('myMac');
+  const macHint = document.getElementById('macHint');
+  if(routerMac){
+    myMacEl.textContent = routerMac.toUpperCase();
+  } else {
+    myMacEl.textContent = 'Not detected';
+    myMacEl.style.color = 'var(--text-lo)';
+  }
+
+  /*
+   * ---------------------------------------------------------------
+   * GATEWAY DETECTION — cosmetic/support only. Different hotspot
+   * systems redirect here with different query-string conventions;
+   * we sniff those to show a friendlier "Connection: MikroTik" label
+   * and tailor the troubleshoot copy. This never affects pricing,
+   * MAC binding, or payment — those always come from routerMac /
+   * the backend. If nothing matches, fall back to letting the person
+   * pick manually so support tips are still useful.
+   * ---------------------------------------------------------------
+   */
+  function detectRouterType(){
+    const params = new URLSearchParams(window.location.search);
+    // MikroTik's hotspot login page conventionally passes these.
+    if(params.has('link-login-only') || params.has('link-orig') || params.has('trial') || params.has('linkbox')) return 'mikrotik';
+    // CoovaChilli / classic Chillispot params.
+    if(params.has('nasid') || params.has('res') && params.has('uamip')) return 'chilli';
+    if(params.has('uamip') || params.has('challenge')) return 'chilli';
+    // Generic captive-portal MAC param present but none of the above —
+    // still a real hotspot gateway, just not one we recognize by name.
+    if(routerMac) return 'unknown_hotspot';
+    return null;
+  }
+
+  const routerLabels = {
+    mikrotik: 'MikroTik hotspot',
+    chilli: 'Hotspot login (CoovaChilli)',
+    unknown_hotspot: 'Hotspot gateway',
+    home_router: 'Home router',
+    unsure: 'Unknown',
+  };
+
+  const routerBar = document.getElementById('routerBar');
+  const routerTypeVal = document.getElementById('routerTypeVal');
+  const routerPickerWrap = document.getElementById('routerPickerWrap');
+  const routerPicker = document.getElementById('routerPicker');
+  let detectedRouterType = detectRouterType();
+
+  function applyRouterType(type){
+    detectedRouterType = type;
+    if(type && routerLabels[type]){
+      routerBar.style.display = '';
+      routerTypeVal.textContent = routerLabels[type];
+    }
+  }
+
+  if(detectedRouterType){
+    applyRouterType(detectedRouterType);
+  } else {
+    // Couldn't auto-detect — offer the manual picker instead of guessing.
+    routerPickerWrap.style.display = '';
+    routerPicker.addEventListener('change', () => {
+      if(routerPicker.value) applyRouterType(routerPicker.value);
+    });
+  }
+
+  // Splash screen: time-aware greeting, auto-dismiss
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('splashGreeting').textContent = greeting;
+  setTimeout(() => { document.getElementById('splash').classList.add('hide'); }, 9500);
+  document.getElementById('splash').addEventListener('click', () => {
+    document.getElementById('splash').classList.add('hide');
+  });
+
+  // Support panel
+  const supportOverlay = document.getElementById('supportOverlay');
+  document.getElementById('chatFab').addEventListener('click', () => supportOverlay.classList.add('open'));
+  document.getElementById('closeSupport').addEventListener('click', () => supportOverlay.classList.remove('open'));
+  supportOverlay.addEventListener('click', (e) => { if(e.target === supportOverlay) supportOverlay.classList.remove('open'); });
+
+  document.getElementById('paidLink').addEventListener('click', () => {
+    document.getElementById('loginSection').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  document.getElementById('callFab').addEventListener('click', () => {
+    window.location.href = 'tel:0728772286';
+  });
+
+  document.getElementById('troubleshootBtn').addEventListener('click', function(){
+    this.textContent = '⏳ Checking device…';
+    setTimeout(() => {
+      const tips = {
+        mikrotik: "✕ Couldn't find this device — try forgetting and rejoining the WiFi network so the MikroTik hotspot redirects you here fresh, or buy a package above.",
+        chilli: "✕ Couldn't find this device — try reopening this page from the WiFi sign-in prompt, or buy a package above.",
+        home_router: "✕ Couldn't find this device — this looks like a home router rather than our hotspot; make sure you're connected to the Konnect Free network, not your own WiFi.",
+      };
+      this.textContent = tips[detectedRouterType] || "✕ Couldn't find this device — buy a package or paste your M-Pesa message above";
+    }, 1100);
+  });
+
+  // ---------------------------------------------------------------
+  // Small helper for form status messages, shared by the standalone
+  // forms below (voucher, reconnect, M-Pesa message, TV bind).
+  // ---------------------------------------------------------------
+  function showFormStatus(el, kind, message){
+    el.className = 'form-status show ' + kind;
+    el.textContent = message;
+  }
+
+  // Paste M-Pesa message
+  (function(){
+    const btn = document.getElementById('mpesaMsgBtn');
+    const statusEl = document.getElementById('mpesaMsgStatus');
+    btn.addEventListener('click', async () => {
+      const message = document.getElementById('mpesaMsg').value.trim();
+      if(message.length < 15){ showFormStatus(statusEl, 'fail', 'Paste the full M-Pesa confirmation message.'); return; }
+      btn.disabled = true;
+      showFormStatus(statusEl, 'info', 'Verifying your M-Pesa message…');
+      try{
+        const phone = document.getElementById('mpesaMsgPhone').value.trim();
+        const data = await apiFetch('/verify-mpesa-message', { method: 'POST', body: JSON.stringify({ message, phone, mac: routerMac || undefined }) });
+        showFormStatus(statusEl, data.status === 'already_verified' ? 'ok' : 'info', data.message);
+      } catch(err){
+        showFormStatus(statusEl, 'fail', err.message || 'Could not verify that message right now. Message support on WhatsApp instead.');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  })();
+
+  // Voucher activation — uses the router-supplied MAC when available,
+  // since a voucher binds a specific device just like a paid package.
+  (function(){
+    const btn = document.getElementById('voucherBtn');
+    const statusEl = document.getElementById('voucherStatus');
+    btn.addEventListener('click', async () => {
+      const code = document.getElementById('voucherCode').value.trim();
+      const phone = document.getElementById('voucherPhone').value.trim();
+      if(!code){ showFormStatus(statusEl, 'fail', 'Enter your voucher code.'); return; }
+      if(!phone){ showFormStatus(statusEl, 'fail', 'Enter your phone number.'); return; }
+      if(!routerMac){ showFormStatus(statusEl, 'fail', "We couldn't detect your device automatically. Please open this page from the WiFi sign-in screen on the device you want connected."); return; }
+      btn.disabled = true;
+      showFormStatus(statusEl, 'info', 'Activating voucher…');
+      try{
+        const data = await apiFetch('/vouchers/activate', { method: 'POST', body: JSON.stringify({ code, phone, mac: routerMac }) });
+        showFormStatus(statusEl, 'ok', `Activated! Your ${data.package?.name || 'package'} is now connected.`);
+      } catch(err){
+        showFormStatus(statusEl, 'fail', err.message || 'Could not activate that voucher. Message support with your code.');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  })();
+
+  // Reconnect
+  (function(){
+    const btn = document.getElementById('reconnectBtn');
+    const statusEl = document.getElementById('reconnectStatus');
+    btn.addEventListener('click', async () => {
+      const identifier = document.getElementById('reconnectId').value.trim();
+      if(!identifier){ showFormStatus(statusEl, 'fail', 'Enter your phone number or voucher code.'); return; }
+      btn.disabled = true;
+      showFormStatus(statusEl, 'info', 'Looking up your package…');
+      try{
+        const data = await apiFetch('/reconnect', { method: 'POST', body: JSON.stringify({ identifier }) });
+        showFormStatus(statusEl, 'ok', `Found an active package — status: ${data.status}. Rejoin the WiFi network to reconnect.`);
+      } catch(err){
+        showFormStatus(statusEl, 'fail', err.message || "Backend isn't reachable right now. Try the troubleshoot button below, or message support.");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  })();
+
+  // TV / other device — bind & pay. Same MAC-address-entry model as
+  // the main flow, just without router-supplied auto-detection (the
+  // whole point of this form is for devices that can't open this page
+  // themselves, so there's no redirect to read a MAC param from).
+  // Self-contained (own polling) rather than reusing showStep()/the
+  // modal, since this section isn't inside the package overlay.
+  (async function(){
+    try {
+      const data = await apiFetch('/packages');
+      const sel = document.getElementById('tvPackage');
+      (data.packages || []).forEach((p) => {
+        const opt = document.createElement('option');
+        opt.value = p._id;
+        opt.textContent = `${p.name} — ${p.dataLimitLabel} · ${p.periodLabel} · KSh ${p.priceKsh.toLocaleString()}`;
+        sel.appendChild(opt);
+      });
+    } catch(err) {
+      console.warn('Could not load packages for TV form:', err);
+    }
+  })();
+
+  (function(){
+    const btn = document.getElementById('tvBindBtn');
+    const statusEl = document.getElementById('tvStatus');
+    let tvPollTimer = null, tvCountdownTimer = null;
+
+    btn.addEventListener('click', async () => {
+      const mac = document.getElementById('tvMac').value.trim().toUpperCase();
+      const packageId = document.getElementById('tvPackage').value;
+      const name = document.getElementById('tvName').value.trim() || 'Customer';
+      const phone = document.getElementById('tvPhone').value.trim();
+      if(!/^([0-9A-F]{2}:){5}[0-9A-F]{2}$/.test(mac)){ showFormStatus(statusEl, 'fail', "Enter a valid MAC address (e.g. AA:BB:CC:DD:EE:FF)."); return; }
+      if(!packageId){ showFormStatus(statusEl, 'fail', 'Choose a package.'); return; }
+      if(!phone){ showFormStatus(statusEl, 'fail', 'Enter your M-Pesa phone number.'); return; }
+
+      btn.disabled = true;
+      showFormStatus(statusEl, 'info', 'Starting M-Pesa payment…');
+
+      let invoiceId;
+      try {
+        const data = await apiFetch('/stk-push', { method: 'POST', body: JSON.stringify({ name, phone, mac, packageId }) });
+        invoiceId = data.invoiceId;
+        if(!invoiceId) throw new Error('No invoice returned');
+      } catch(err) {
+        showFormStatus(statusEl, 'fail', err.message || 'Could not start M-Pesa payment. Check your connection and try again.');
+        btn.disabled = false;
+        return;
+      }
+
+      showFormStatus(statusEl, 'info', 'Check your phone and enter your M-Pesa PIN — waiting for confirmation…');
+      let secondsLeft = 60;
+      tvCountdownTimer = setInterval(() => {
+        secondsLeft--;
+        if(secondsLeft <= 0){
+          clearInterval(tvCountdownTimer); clearInterval(tvPollTimer);
+          showFormStatus(statusEl, 'fail', "Didn't receive confirmation in time. If you approved the prompt, paste your M-Pesa message above to verify manually.");
+          btn.disabled = false;
+        } else {
+          showFormStatus(statusEl, 'info', `Waiting for confirmation… ${secondsLeft}s`);
+        }
+      }, 1000);
+
+      tvPollTimer = setInterval(async () => {
+        try {
+          const data = await apiFetch(`/stk-status/${invoiceId}`);
+          if(data.status === 'paid'){
+            clearInterval(tvPollTimer); clearInterval(tvCountdownTimer);
+            showFormStatus(statusEl, 'info', 'Payment confirmed — connecting your device…');
+            pollTvDeviceStatus(mac, statusEl, btn);
+          } else if(data.status === 'failed' || data.status === 'cancelled'){
+            clearInterval(tvPollTimer); clearInterval(tvCountdownTimer);
+            showFormStatus(statusEl, 'fail', 'Payment was cancelled or declined. No money was deducted.');
+            btn.disabled = false;
+          }
+        } catch(err) {
+          console.warn('tv stk-status poll failed:', err.message);
+        }
+      }, 3000);
+    });
+
+    function pollTvDeviceStatus(mac, statusEl, btn){
+      let attempts = 0;
+      const timer = setInterval(async () => {
+        attempts++;
+        try {
+          const data = await apiFetch(`/device-status/${encodeURIComponent(mac)}`);
+          if(data.status === 'bound'){
+            clearInterval(timer);
+            showFormStatus(statusEl, 'ok', `Connected! Your device is online until ${data.expiresAt ? new Date(data.expiresAt).toLocaleString() : 'your package expires'}.`);
+            btn.disabled = false;
+          } else if(data.status === 'failed'){
+            clearInterval(timer);
+            showFormStatus(statusEl, 'fail', 'Payment succeeded but we could not connect your device. Message support with your M-Pesa code.');
+            btn.disabled = false;
+          } else if(attempts > 20){
+            clearInterval(timer);
+            showFormStatus(statusEl, 'fail', "Taking longer than expected — message support with your M-Pesa code if this doesn't update soon.");
+            btn.disabled = false;
+          }
+        } catch(err) {
+          console.warn('tv device-status poll failed:', err.message);
+        }
+      }, 2000);
+    }
+  })();
+  document.getElementById('tvCancelBtn').addEventListener('click', () => {
+    document.getElementById('tvMac').value = '';
+    document.getElementById('tvPackage').value = '';
+    document.getElementById('tvName').value = '';
+    document.getElementById('tvPhone').value = '';
+    document.getElementById('tvStatus').className = 'form-status';
+  });
+
+  const overlay = document.getElementById('overlay');
+  const closeSheet = document.getElementById('closeSheet');
+  const grid = document.getElementById('packageGrid');
+  const sumName = document.getElementById('sumName');
+  const sumMeta = document.getElementById('sumMeta');
+  const sumPrice = document.getElementById('sumPrice');
+  const macInput = document.getElementById('custMac');
+  const confirmBtn = document.getElementById('confirmBtn');
+
+  // Prefill + lock the MAC field when the router already told us the device's MAC.
+  if(routerMac){
+    macInput.value = routerMac.toUpperCase();
+    macInput.readOnly = true;
+    macHint.textContent = 'Detected automatically from your connection — no need to type it in.';
+  }
+
+  const stepForm = document.getElementById('stepForm');
+  const stepPending = document.getElementById('stepPending');
+  const stepConnecting = document.getElementById('stepConnecting');
+  const stepSuccess = document.getElementById('stepSuccess');
+  const stepFail = document.getElementById('stepFail');
+  const steps = [stepForm, stepPending, stepConnecting, stepSuccess, stepFail];
+  function showStep(panel){ steps.forEach(s => s.classList.remove('active')); panel.classList.add('active'); }
+
+  let selectedPackage = { name:'Extended', meta:'18GB · 3 weeks', price:'KSh 450', id:null };
+  let pollTimer = null;
+  let countdownTimer = null;
+
+  // Pull real packages (with real Mongo IDs + live prices) from the backend
+  // and stamp each card with its packageId. The card's own name/data/period/
+  // price text stays as the fallback display copy, but data-package-id is
+  // what actually gets sent to /stk-push — the price the server charges
+  // always comes from its own DB lookup, never from this page.
+  (async function loadPackages(){
+    try {
+      const data = await apiFetch('/packages');
+      const bySlugName = {};
+      (data.packages || []).forEach(p => { bySlugName[p.name.toLowerCase()] = p; });
+      document.querySelectorAll('#packageGrid .card').forEach(card => {
+        const match = bySlugName[(card.dataset.name || '').toLowerCase()];
+        if(match){
+          card.dataset.packageId = match._id;
+          card.dataset.data = match.dataLimitLabel;
+          card.dataset.period = match.periodLabel;
+          card.dataset.price = `KSh ${match.priceKsh.toLocaleString()}`;
+          const priceEl = card.querySelector('.card-price');
+          if(priceEl) priceEl.textContent = card.dataset.price;
+        }
+      });
+    } catch(err){
+      console.warn('Could not load live packages from backend — buy buttons will show a connection error until API_BASE is configured.', err);
+    }
+  })();
+
+  grid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.buy-btn');
+    if(!btn) return;
+    const card = btn.closest('.card');
+    selectedPackage = {
+      name: card.dataset.name,
+      meta: `${card.dataset.data} · ${card.dataset.period}`,
+      price: card.dataset.price,
+      id: card.dataset.packageId || null,
+    };
+    sumName.textContent = selectedPackage.name;
+    sumMeta.textContent = selectedPackage.meta;
+    sumPrice.textContent = selectedPackage.price;
+    showStep(stepForm);
+    overlay.classList.add('open');
+  });
+
+  function closeModal(){
+    overlay.classList.remove('open');
+    clearInterval(pollTimer); clearInterval(countdownTimer);
+  }
+  closeSheet.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+
+  // Auto-format MAC address as the user types
+  macInput.addEventListener('input', (e) => {
+    let v = e.target.value.replace(/[^0-9a-fA-F]/g, '').toUpperCase().slice(0,12);
+    let formatted = v.match(/.{1,2}/g)?.join(':') || v;
+    e.target.value = formatted;
+  });
+
+  confirmBtn.addEventListener('click', () => {
+    const name = document.getElementById('custName').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+    const mac = macInput.value.trim();
+    if(!name || !phone || mac.length < 17){
+      confirmBtn.textContent = 'Please fill in all fields';
+      confirmBtn.style.background = 'linear-gradient(120deg,#d98a6a,#a9522f)';
+      setTimeout(()=>{
+        confirmBtn.textContent = 'Pay & connect device';
+        confirmBtn.style.background = '';
+      }, 1600);
+      return;
+    }
+    startPayment({ name, phone, mac, package: selectedPackage });
+  });
+
+  /*
+   * ---------------------------------------------------------------
+   * PAYMENT FLOW — wired to the konnect-free-backend API.
+   *
+   * 1) startPayment() calls POST /api/stk-push, which triggers
+   *    IntaSend's M-Pesa STK push and returns an invoiceId.
+   * 2) pollPaymentStatus() polls GET /api/stk-status/:invoiceId,
+   *    which reflects whatever the IntaSend webhook last recorded —
+   *    the browser never talks to IntaSend directly.
+   * 3) Once paid, showConnecting() polls GET /api/device-status/:mac
+   *    until the router bind completes, then showSuccess() runs.
+   * ---------------------------------------------------------------
+   */
+  async function startPayment(details){
+    showStep(stepPending);
+    document.getElementById('pendingPhone').textContent = details.phone;
+    document.getElementById('pendingAmount').textContent = details.package.price;
+
+    if(!details.package.id){
+      clearInterval(countdownTimer);
+      showFailure('Package unavailable', "We couldn't confirm this package's live price. Please close this and try again — if it keeps happening, message support.");
+      return;
+    }
+
+    let secondsLeft = 60;
+    const countdownEl = document.getElementById('payCountdown');
+    countdownTimer = setInterval(() => {
+      secondsLeft--;
+      countdownEl.textContent = `Waiting for confirmation… ${secondsLeft}s`;
+      if(secondsLeft <= 0){
+        clearInterval(countdownTimer);
+        clearInterval(pollTimer);
+        showFailure('Payment timed out', "We didn't receive confirmation in time. If you approved the prompt, paste your M-Pesa message on the home screen to verify manually.");
+      }
+    }, 1000);
+
+    try{
+      const data = await apiFetch('/stk-push', {
+        method: 'POST',
+        body: JSON.stringify({ name: details.name, phone: details.phone, mac: details.mac, packageId: details.package.id }),
+      });
+      if(!data.invoiceId) throw new Error('No invoice returned');
+      pollPaymentStatus(data.invoiceId, details);
+    } catch(err){
+      clearInterval(countdownTimer);
+      showFailure('Could not reach payment service', err.message || 'There was a problem starting the M-Pesa prompt. Check your connection and try again.');
+    }
+  }
+
+  function pollPaymentStatus(invoiceId, details){
+    pollTimer = setInterval(async () => {
+      try{
+        const data = await apiFetch(`/stk-status/${invoiceId}`);
+        if(data.status === 'paid'){
+          clearInterval(pollTimer); clearInterval(countdownTimer);
+          showConnecting({ ...details, mpesaCode: data.mpesaCode });
+        } else if(data.status === 'failed' || data.status === 'cancelled'){
+          clearInterval(pollTimer); clearInterval(countdownTimer);
+          showFailure('Payment cancelled', 'The M-Pesa prompt was cancelled or declined. No money was deducted.');
+        }
+      } catch(err){
+        // Transient network hiccup — let the 60s countdown keep trying rather
+        // than failing the flow on a single dropped poll.
+        console.warn('stk-status poll failed:', err.message);
+      }
+    }, 3000);
+  }
+
+  // "Connecting you to Starlink…" — shown right after payment is confirmed,
+  // while the backend whitelists the MAC on the router.
+  function showConnecting(details){
+    showStep(stepConnecting);
+    const statusEl = document.getElementById('connectingStatus');
+    const messages = ['Binding device…', 'Adding you to the dish network…', 'Almost there…'];
+    let i = 0;
+    statusEl.textContent = messages[0];
+    const msgTimer = setInterval(() => {
+      i = (i + 1) % messages.length;
+      statusEl.textContent = messages[i];
+    }, 900);
+
+    let attempts = 0;
+    pollTimer = setInterval(async () => {
+      attempts++;
+      try{
+        const data = await apiFetch(`/device-status/${encodeURIComponent(details.mac)}`);
+        if(data.status === 'bound'){
+          clearInterval(pollTimer); clearInterval(msgTimer);
+          showSuccess({ ...details, expiresAt: data.expiresAt });
+        } else if(data.status === 'failed'){
+          clearInterval(pollTimer); clearInterval(msgTimer);
+          showFailure('Could not connect device', 'Payment succeeded but we could not add your device to the network. Message support with your M-Pesa code.');
+        } else if(attempts > 20){ // ~40s of polling with no resolution
+          clearInterval(pollTimer); clearInterval(msgTimer);
+          showFailure('Taking longer than expected', 'Payment succeeded but your device is still being connected. Message support with your M-Pesa code if this page doesn\'t update soon.');
+        }
+      } catch(err){
+        console.warn('device-status poll failed:', err.message);
+      }
+    }, 2000);
+  }
+
+  function showSuccess(details){
+    document.getElementById('rcptPackage').textContent = `${details.package.name} · ${details.package.meta}`;
+    document.getElementById('rcptAmount').textContent = details.package.price;
+    document.getElementById('rcptCode').textContent = details.mpesaCode;
+    document.getElementById('rcptMac').textContent = details.mac;
+    showStep(stepSuccess);
+  }
+
+  function showFailure(title, reason){
+    document.getElementById('failTitle').textContent = title;
+    document.getElementById('failReason').textContent = reason;
+    showStep(stepFail);
+  }
+
+  document.getElementById('cancelPending').addEventListener('click', () => {
+    clearInterval(pollTimer); clearInterval(countdownTimer);
+    showFailure('Payment cancelled', "You cancelled before confirmation. No money was deducted — you can try again anytime.");
+  });
+  document.getElementById('retryBtn').addEventListener('click', () => showStep(stepForm));
+  document.getElementById('failSupportBtn').addEventListener('click', () => {
+    closeModal();
+    document.getElementById('supportOverlay').classList.add('open');
+  });
+  document.getElementById('doneBtn').addEventListener('click', closeModal);
+</script>
+
+</body>
+</html>

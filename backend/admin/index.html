@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konnect Free — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0a0908; --panel:#18140d; --panel-line:rgba(232,196,104,0.14);
+    --gold:#e8c468; --gold-deep:#a9781f; --text-hi:#f5efe0; --text-mid:#c9bfa4; --text-lo:#8d8267;
+    --ok:#7fc49a; --fail:#d98a6a;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--void); color:var(--text-hi); font-family:'Manrope',sans-serif; }
+  .wrap{ max-width:1000px; margin:0 auto; padding:28px 20px 60px; }
+  h1{ font-family:'Fraunces',serif; font-size:22px; font-weight:600; color:var(--gold); margin:0; }
+  .row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+  .card{ background:rgba(255,255,255,0.03); border:1px solid var(--panel-line); border-radius:14px; padding:16px; }
+  .stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:24px; }
+  .stat-val{ font-family:'Fraunces',serif; font-size:26px; color:var(--gold); }
+  .stat-label{ font-size:11.5px; color:var(--text-lo); text-transform:uppercase; letter-spacing:0.06em; margin-top:4px; }
+  .router-status{ display:inline-flex; align-items:center; gap:7px; font-size:12px; color:var(--text-lo); padding:6px 12px; border-radius:999px; border:1px solid var(--panel-line); margin-bottom:20px; }
+  .router-status .dot{ width:8px; height:8px; border-radius:50%; background:var(--text-lo); }
+  .router-status.ok .dot{ background:var(--ok); } .router-status.ok{ color:var(--ok); }
+  .router-status.down .dot{ background:var(--fail); } .router-status.down{ color:var(--fail); }
+  .router-status.sim .dot{ background:var(--gold); } .router-status.sim{ color:var(--gold); }
+  .msg-cell{ max-width:280px; white-space:pre-wrap; font-size:11.5px; color:var(--text-mid); font-family:'IBM Plex Mono',monospace; }
+  .row-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+  .row-actions select{ padding:5px 8px; font-size:11.5px; }
+  .row-actions button{ padding:5px 10px; font-size:11.5px; }
+  button.danger{ background:transparent; color:var(--fail); border:1px solid rgba(217,138,106,0.4); }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th,td{ text-align:left; padding:9px 8px; border-bottom:1px solid var(--panel-line); }
+  th{ color:var(--text-lo); font-weight:600; text-transform:uppercase; font-size:10.5px; letter-spacing:0.05em; }
+  .badge{ padding:3px 8px; border-radius:999px; font-size:11px; font-weight:700; }
+  .badge.bound, .badge.paid{ background:rgba(127,196,154,0.14); color:var(--ok); }
+  .badge.failed, .badge.cancelled{ background:rgba(217,138,106,0.14); color:var(--fail); }
+  .badge.pending{ background:rgba(232,196,104,0.14); color:var(--gold); }
+  section{ margin-bottom:28px; }
+  section h2{ font-family:'Fraunces',serif; font-size:16px; margin:0 0 12px; }
+  input,select,button{ font-family:'Manrope',sans-serif; }
+  input,select{ background:rgba(255,255,255,0.03); border:1px solid var(--panel-line); color:var(--text-hi); border-radius:8px; padding:9px 11px; font-size:13px; }
+  button{ background:linear-gradient(120deg,#f5e2b8,var(--gold) 55%,var(--gold-deep)); color:#1a1305; font-weight:800; border:none; border-radius:999px; padding:10px 18px; cursor:pointer; font-size:13px; }
+  button.ghost{ background:transparent; color:var(--gold); border:1px solid rgba(232,196,104,0.4); }
+  .login-box{ max-width:340px; margin:80px auto; }
+  .login-box .field{ margin-bottom:12px; }
+  .login-box label{ display:block; font-size:11px; color:var(--text-lo); margin-bottom:6px; text-transform:uppercase; }
+  .login-box input{ width:100%; }
+  .err{ color:var(--fail); font-size:12.5px; margin-top:8px; }
+  .voucher-form{ display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:14px; }
+  .voucher-out{ font-family:'IBM Plex Mono',monospace; font-size:12px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; white-space:pre-wrap; margin-top:10px; display:none; }
+  #app{ display:none; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="wrap">
+  <div class="login-box card">
+    <h1 style="margin-bottom:18px;">Konnect Free Admin</h1>
+    <div class="field">
+      <label>Username</label>
+      <input id="loginUser" type="text" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="loginPass" type="password" autocomplete="current-password">
+    </div>
+    <button id="loginSubmit" style="width:100%;">Sign in</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="app" class="wrap">
+  <div class="row">
+    <h1>Konnect Free Admin</h1>
+    <div>
+      <span id="whoami" style="color:var(--text-lo); font-size:12.5px; margin-right:14px;"></span>
+      <button class="ghost" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+
+  <div class="stats" id="statsGrid"></div>
+  <div class="router-status" id="routerStatus"><span class="dot"></span><span id="routerStatusText">Checking router…</span></div>
+
+  <section>
+    <h2>Needs attention — failed router binds</h2>
+    <div class="card">
+      <table id="failedTable"><thead><tr><th>MAC</th><th>Customer</th><th>Package</th><th>Error</th><th>When</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <section>
+    <h2>M-Pesa messages awaiting review</h2>
+    <div class="card">
+      <table id="reviewsTable"><thead><tr><th>Message</th><th>Amount</th><th>Code</th><th>Phone</th><th>MAC</th><th>When</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Active devices</h2>
+    <div class="card">
+      <table id="devicesTable"><thead><tr><th>MAC</th><th>Customer</th><th>Package</th><th>Status</th><th>Expires</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Recent payments</h2>
+    <div class="card">
+      <table id="paymentsTable"><thead><tr><th>Phone</th><th>Package</th><th>Amount</th><th>Status</th><th>M-Pesa code</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Generate vouchers</h2>
+    <div class="card">
+      <div class="voucher-form">
+        <div class="field"><label style="display:block;font-size:11px;color:var(--text-lo);margin-bottom:6px;">Package ID</label><input id="voucherPkgId" placeholder="Mongo _id"></div>
+        <div class="field"><label style="display:block;font-size:11px;color:var(--text-lo);margin-bottom:6px;">Quantity</label><input id="voucherQty" type="number" value="10" min="1" max="500" style="width:90px;"></div>
+        <button id="genVoucherBtn">Generate</button>
+      </div>
+      <div class="voucher-out" id="voucherOut"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Vouchers</h2>
+    <div class="card">
+      <div style="margin-bottom:10px;"><button class="ghost" id="exportVouchersBtn" style="padding:7px 14px;font-size:12px;">Export unused as CSV</button></div>
+      <table id="vouchersTable"><thead><tr><th>Code</th><th>Package</th><th>Status</th><th>Batch</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Served from the same Express app as the API (see src/app.js '/admin'
+  // route), so same-origin relative calls just work. Only set
+  // window.KONNECT_API_BASE (before this script runs) if you're hosting
+  // this page separately from the backend.
+  const API_BASE = window.KONNECT_API_BASE || '';
+
+  const $ = (id) => document.getElementById(id);
+  let token = null; // kept in memory + localStorage; for stronger hardening,
+                     // move to an httpOnly cookie issued by the login endpoint instead.
+
+  function api(path, opts = {}) {
+    return fetch(API_BASE + path, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(opts.headers || {}),
+      },
+    }).then(async (res) => {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      return data;
+    });
+  }
+
+  function showApp(admin) {
+    $('loginScreen').style.display = 'none';
+    $('app').style.display = 'block';
+    $('whoami').textContent = `${admin.username} · ${admin.role}`;
+    loadStats(); loadRouterStatus(); loadFailedDevices(); loadReviews(); loadDevices(); loadPayments(); loadVouchers();
+  }
+
+  $('loginSubmit').addEventListener('click', async () => {
+    $('loginErr').textContent = '';
+    try {
+      const data = await api('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ username: $('loginUser').value.trim(), password: $('loginPass').value }),
+      });
+      token = data.token;
+      localStorage.setItem('konnect_admin_token', token);
+      showApp(data.admin);
+    } catch (err) {
+      $('loginErr').textContent = err.message;
+    }
+  });
+
+  $('logoutBtn').addEventListener('click', () => {
+    token = null;
+    localStorage.removeItem('konnect_admin_token');
+    location.reload();
+  });
+
+  async function loadStats() {
+    const { activeDevices, revenue24hKsh, paymentsToday, totalCustomers } = await api('/api/admin/stats');
+    $('statsGrid').innerHTML = [
+      ['Active devices', activeDevices],
+      ['Revenue (24h)', `KSh ${revenue24hKsh.toLocaleString()}`],
+      ['Payments today', paymentsToday],
+      ['Total customers', totalCustomers],
+    ].map(([label, val]) => `<div class="card"><div class="stat-val">${val}</div><div class="stat-label">${label}</div></div>`).join('');
+  }
+
+  async function loadRouterStatus() {
+    const el = $('routerStatus');
+    const text = $('routerStatusText');
+    try {
+      const status = await api('/api/admin/router-status');
+      if (status.simulated) {
+        el.className = 'router-status sim';
+        text.textContent = 'Router not configured — running in simulated mode';
+      } else if (status.ok) {
+        el.className = 'router-status ok';
+        text.textContent = 'Router reachable';
+      } else {
+        el.className = 'router-status down';
+        text.textContent = `Router unreachable — ${status.reason || 'unknown error'}`;
+      }
+    } catch (err) {
+      el.className = 'router-status down';
+      text.textContent = 'Could not check router status';
+    }
+  }
+
+  // Cached package list, used to populate the "approve" package picker
+  // on M-Pesa reviews (public endpoint, no auth needed).
+  let cachedPackages = null;
+  async function getPackages() {
+    if (cachedPackages) return cachedPackages;
+    const data = await fetch(API_BASE + '/api/packages').then((r) => r.json());
+    cachedPackages = data.packages || [];
+    return cachedPackages;
+  }
+
+  async function loadFailedDevices() {
+    const { devices } = await api('/api/admin/devices/failed');
+    $('failedTable').querySelector('tbody').innerHTML = devices.map((d) => `
+      <tr>
+        <td style="font-family:'IBM Plex Mono',monospace;">${d.mac}</td>
+        <td>${d.customer?.name || '—'} · ${d.customer?.phone || '—'}</td>
+        <td>${d.package?.name || '—'}</td>
+        <td style="color:var(--fail); font-size:11.5px; max-width:220px;">${d.routerNote || '—'}</td>
+        <td>${new Date(d.createdAt).toLocaleString()}</td>
+        <td><button data-retry="${d._id}" style="padding:5px 10px;font-size:11.5px;">Retry bind</button></td>
+      </tr>`).join('') || '<tr><td colspan="6" style="color:var(--text-lo);">Nothing needs attention.</td></tr>';
+  }
+
+  $('failedTable').addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-retry]');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+      await api(`/api/admin/devices/${btn.dataset.retry}/retry-bind`, { method: 'POST' });
+      loadFailedDevices(); loadStats(); loadDevices();
+    } catch (err) {
+      alert('Retry failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Retry bind';
+    }
+  });
+
+  async function loadReviews() {
+    const { reviews } = await api('/api/admin/mpesa-reviews?status=pending');
+    const packages = await getPackages().catch(() => []);
+    const pkgOptions = packages.map((p) => `<option value="${p._id}">${p.name} · KSh ${p.priceKsh}</option>`).join('');
+    $('reviewsTable').querySelector('tbody').innerHTML = reviews.map((r) => `
+      <tr>
+        <td class="msg-cell">${(r.message || '').replace(/</g, '&lt;')}</td>
+        <td>${r.extractedAmountKsh ? 'KSh ' + r.extractedAmountKsh : '—'}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">${r.extractedCode || '—'}</td>
+        <td>${r.phone || '—'}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">${r.mac || '—'}</td>
+        <td>${new Date(r.createdAt).toLocaleString()}</td>
+        <td>
+          <div class="row-actions">
+            <select data-pkg-for="${r._id}" ${!r.mac ? 'disabled' : ''}><option value="">Package…</option>${pkgOptions}</select>
+            <button data-approve="${r._id}" ${!r.mac ? 'disabled title="No MAC on file — reject and ask them to resubmit"' : ''}>Approve &amp; connect</button>
+            <button class="danger" data-reject="${r._id}">Reject</button>
+          </div>
+        </td>
+      </tr>`).join('') || '<tr><td colspan="7" style="color:var(--text-lo);">Nothing pending review.</td></tr>';
+  }
+
+  $('reviewsTable').addEventListener('click', async (e) => {
+    const approveBtn = e.target.closest('button[data-approve]');
+    const rejectBtn = e.target.closest('button[data-reject]');
+    if (approveBtn) {
+      const id = approveBtn.dataset.approve;
+      const select = document.querySelector(`select[data-pkg-for="${id}"]`);
+      const packageId = select?.value;
+      if (!packageId) { alert('Choose a package first.'); return; }
+      if (!confirm('Confirm you have checked this against the real M-Pesa statement before approving.')) return;
+      approveBtn.disabled = true;
+      approveBtn.textContent = '…';
+      const doApprove = async (force) => {
+        await api(`/api/admin/mpesa-reviews/${id}/approve`, { method: 'POST', body: JSON.stringify({ packageId, force }) });
+        loadReviews(); loadStats(); loadDevices(); loadFailedDevices();
+      };
+      try {
+        await doApprove(false);
+      } catch (err) {
+        if (/Amount mismatch/.test(err.message) && confirm(err.message + '\n\nApprove anyway?')) {
+          try {
+            await doApprove(true);
+          } catch (err2) {
+            alert('Error: ' + err2.message);
+            approveBtn.disabled = false;
+            approveBtn.textContent = 'Approve & connect';
+          }
+        } else {
+          alert('Error: ' + err.message);
+          approveBtn.disabled = false;
+          approveBtn.textContent = 'Approve & connect';
+        }
+      }
+    } else if (rejectBtn) {
+      const note = prompt('Reason for rejecting (optional):') || '';
+      rejectBtn.disabled = true;
+      try {
+        await api(`/api/admin/mpesa-reviews/${rejectBtn.dataset.reject}/reject`, { method: 'POST', body: JSON.stringify({ note }) });
+        loadReviews();
+      } catch (err) {
+        alert('Error: ' + err.message);
+        rejectBtn.disabled = false;
+      }
+    }
+  });
+
+  async function loadDevices() {
+    const { devices } = await api('/api/admin/devices');
+    $('devicesTable').querySelector('tbody').innerHTML = devices.map((d) => `
+      <tr>
+        <td style="font-family:'IBM Plex Mono',monospace;">${d.mac}</td>
+        <td>${d.customer?.name || '—'} · ${d.customer?.phone || '—'}</td>
+        <td>${d.package?.name || '—'}</td>
+        <td><span class="badge ${d.status}">${d.status}</span></td>
+        <td>${d.expiresAt ? new Date(d.expiresAt).toLocaleString() : '—'}</td>
+      </tr>`).join('') || '<tr><td colspan="5" style="color:var(--text-lo);">No devices yet.</td></tr>';
+  }
+
+  async function loadPayments() {
+    const { payments } = await api('/api/admin/payments');
+    $('paymentsTable').querySelector('tbody').innerHTML = payments.map((p) => `
+      <tr>
+        <td>${p.phone}</td>
+        <td>${p.package?.name || '—'}</td>
+        <td>KSh ${p.amountKsh}</td>
+        <td><span class="badge ${p.status}">${p.status}</span></td>
+        <td>${p.mpesaCode || '—'}</td>
+      </tr>`).join('') || '<tr><td colspan="5" style="color:var(--text-lo);">No payments yet.</td></tr>';
+  }
+
+  $('genVoucherBtn').addEventListener('click', async () => {
+    const out = $('voucherOut');
+    out.style.display = 'block';
+    out.textContent = 'Generating…';
+    try {
+      const data = await api('/api/admin/vouchers', {
+        method: 'POST',
+        body: JSON.stringify({ packageId: $('voucherPkgId').value.trim(), quantity: parseInt($('voucherQty').value, 10) || 1 }),
+      });
+      out.textContent = data.vouchers.join('\n');
+      loadVouchers();
+    } catch (err) {
+      out.textContent = 'Error: ' + err.message;
+    }
+  });
+
+  async function loadVouchers() {
+    const { vouchers } = await api('/api/admin/vouchers');
+    $('vouchersTable').querySelector('tbody').innerHTML = vouchers.map((v) => `
+      <tr>
+        <td style="font-family:'IBM Plex Mono',monospace;">${v.code}</td>
+        <td>${v.package?.name || '—'}</td>
+        <td><span class="badge ${v.status === 'used' ? 'paid' : v.status === 'revoked' ? 'failed' : 'pending'}">${v.status}</span></td>
+        <td>${v.batchLabel || '—'}</td>
+        <td>${v.status === 'unused' ? `<button class="ghost" data-revoke="${v._id}" style="padding:5px 10px;font-size:11.5px;">Deactivate</button>` : ''}</td>
+      </tr>`).join('') || '<tr><td colspan="5" style="color:var(--text-lo);">No vouchers yet.</td></tr>';
+  }
+
+  $('exportVouchersBtn').addEventListener('click', async () => {
+    const btn = $('exportVouchersBtn');
+    btn.disabled = true;
+    btn.textContent = 'Exporting…';
+    try {
+      const { vouchers } = await api('/api/admin/vouchers?status=unused');
+      if (!vouchers.length) { alert('No unused vouchers to export.'); return; }
+      const rows = [['code', 'package', 'price_ksh', 'batch', 'created_at']];
+      vouchers.forEach((v) => rows.push([
+        v.code,
+        v.package?.name || '',
+        v.package?.priceKsh ?? '',
+        v.batchLabel || '',
+        new Date(v.createdAt).toISOString(),
+      ]));
+      const csv = rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `konnect-vouchers-unused-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Export failed: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Export unused as CSV';
+    }
+  });
+
+  $('vouchersTable').addEventListener('click', async (e) => {    const btn = e.target.closest('button[data-revoke]');
+    if (!btn) return;
+    if (!confirm('Deactivate this voucher? It will no longer be redeemable.')) return;
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+      await api(`/api/admin/vouchers/${btn.dataset.revoke}/revoke`, { method: 'PATCH' });
+      loadVouchers();
+    } catch (err) {
+      alert('Error: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Deactivate';
+    }
+  });
+
+  // Restore session on reload
+  const saved = localStorage.getItem('konnect_admin_token');
+  if (saved) {
+    token = saved;
+    // We don't have a /me endpoint here — a stats call doubles as a
+    // token check; if it 401s, bounce back to login.
+    api('/api/admin/stats').then(() => {
+      showApp({ username: '(restored session)', role: '' });
+    }).catch(() => {
+      token = null;
+      localStorage.removeItem('konnect_admin_token');
+    });
+  }
+</script>
+</body>
+</html>
