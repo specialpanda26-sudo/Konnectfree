@@ -317,47 +317,6 @@
   .field input::placeholder{ color:var(--text-lo); }
   .field.mono input{ font-family:'IBM Plex Mono', monospace; letter-spacing:0.03em; }
   .field-hint{ font-size:11px; color:var(--text-lo); margin-top:6px; line-height:1.5; }
-
-  /* ---------- CUSTOM SELECT (replaces native <select> so the open
-     dropdown matches the dark/gold theme instead of the OS's own
-     picker UI, which CSS can't restyle) ---------- */
-  .csel{ position:relative; display:inline-block; margin-left:6px; vertical-align:middle; }
-  .csel-trigger{
-    font:inherit; font-size:11px; color:var(--gold-bright);
-    background:rgba(255,255,255,0.04);
-    border:1px solid var(--panel-line);
-    border-radius:var(--radius-sm);
-    padding:6px 26px 6px 10px;
-    cursor:pointer; position:relative;
-    font-family:'Manrope', sans-serif;
-  }
-  .csel-trigger::after{
-    content:''; position:absolute; right:9px; top:50%;
-    width:6px; height:6px;
-    border-right:1.5px solid var(--gold-bright);
-    border-bottom:1.5px solid var(--gold-bright);
-    transform:translateY(-65%) rotate(45deg);
-    pointer-events:none;
-  }
-  .csel-trigger:focus{ outline:none; border-color:var(--gold-bright); }
-  .csel-panel{
-    display:none; position:absolute; z-index:20;
-    top:calc(100% + 6px); left:0; min-width:220px;
-    background:var(--panel);
-    border:1px solid var(--panel-line);
-    border-radius:var(--radius-sm);
-    box-shadow:0 12px 28px rgba(0,0,0,0.5);
-    padding:6px;
-  }
-  .csel-panel.open{ display:block; }
-  .csel-opt{
-    font-family:'Manrope', sans-serif;
-    font-size:13px; color:var(--text-mid);
-    padding:9px 10px; border-radius:9px;
-    cursor:pointer; white-space:nowrap;
-  }
-  .csel-opt:hover{ background:rgba(232,196,104,0.08); color:var(--text-hi); }
-  .csel-opt.selected{ color:var(--gold-bright); font-weight:600; }
   .confirm-btn{
     position:relative; overflow:hidden;
     width:100%; padding:15px 0; margin-top:8px;
@@ -912,16 +871,13 @@
   </div>
   <div class="field-hint" id="routerPickerWrap" style="display:none; padding:0 4px 12px;">
     Having trouble? Tell us what kind of connection this is so we can help faster:
-    <div class="csel" id="routerPicker">
-      <button type="button" class="csel-trigger" id="routerPickerTrigger">Choose…</button>
-      <div class="csel-panel" id="routerPickerPanel">
-        <div class="csel-opt selected" data-value="">Choose…</div>
-        <div class="csel-opt" data-value="mikrotik">MikroTik hotspot</div>
-        <div class="csel-opt" data-value="chilli">Standard hotspot login (CoovaChilli/other)</div>
-        <div class="csel-opt" data-value="home_router">Home router (TP-Link, Safaricom Home WiFi, etc.)</div>
-        <div class="csel-opt" data-value="unsure">Not sure</div>
-      </div>
-    </div>
+    <select id="routerPicker" style="margin-left:6px;">
+      <option value="">Choose…</option>
+      <option value="mikrotik">MikroTik hotspot</option>
+      <option value="chilli">Standard hotspot login (CoovaChilli/other)</option>
+      <option value="home_router">Home router (TP-Link, Safaricom Home WiFi, etc.)</option>
+      <option value="unsure">Not sure</option>
+    </select>
   </div>
 
   <!-- NETWORK SPEED WIDGET -->
@@ -1480,8 +1436,7 @@
   const routerBar = document.getElementById('routerBar');
   const routerTypeVal = document.getElementById('routerTypeVal');
   const routerPickerWrap = document.getElementById('routerPickerWrap');
-  const routerPickerTrigger = document.getElementById('routerPickerTrigger');
-  const routerPickerPanel = document.getElementById('routerPickerPanel');
+  const routerPicker = document.getElementById('routerPicker');
   let detectedRouterType = detectRouterType();
 
   function applyRouterType(type){
@@ -1497,24 +1452,8 @@
   } else {
     // Couldn't auto-detect — offer the manual picker instead of guessing.
     routerPickerWrap.style.display = '';
-    routerPickerTrigger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      routerPickerPanel.classList.toggle('open');
-    });
-    routerPickerPanel.querySelectorAll('.csel-opt').forEach(opt => {
-      opt.addEventListener('click', () => {
-        const value = opt.dataset.value;
-        routerPickerPanel.querySelectorAll('.csel-opt').forEach(o => o.classList.remove('selected'));
-        opt.classList.add('selected');
-        routerPickerTrigger.textContent = opt.textContent;
-        routerPickerPanel.classList.remove('open');
-        if(value) applyRouterType(value);
-      });
-    });
-    document.addEventListener('click', (e) => {
-      if(!routerPickerPanel.contains(e.target) && e.target !== routerPickerTrigger){
-        routerPickerPanel.classList.remove('open');
-      }
+    routerPicker.addEventListener('change', () => {
+      if(routerPicker.value) applyRouterType(routerPicker.value);
     });
   }
 
