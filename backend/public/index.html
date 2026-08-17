@@ -441,6 +441,71 @@
   .mac-bar-label{ color:var(--text-lo); }
   .mac-bar-val{ color:var(--gold-bright); font-weight:500; }
 
+  /* Read-only detected-MAC display inside the payment form — replaces
+     what used to be a manually-typed input. */
+  .mac-detected{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px; font-weight:600; letter-spacing:0.03em;
+    color:var(--gold-bright);
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius-sm);
+    padding:11px 13px;
+  }
+  .mac-detected.missing{ color:var(--danger); }
+
+  /* ---------- NETWORK SPEED WIDGET ---------- */
+  .speed-card{
+    margin:16px 22px 0;
+    display:flex; align-items:center; gap:16px;
+    padding:16px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius-md);
+  }
+  .speed-ring{ position:relative; width:80px; height:80px; flex-shrink:0; }
+  .speed-ring svg{ width:80px; height:80px; transform:rotate(-90deg); }
+  .speed-ring-track{
+    fill:none; stroke:rgba(255,255,255,0.07); stroke-width:6;
+  }
+  .speed-ring-fill{
+    fill:none; stroke:var(--gold-bright); stroke-width:6; stroke-linecap:round;
+    stroke-dasharray:213.6; stroke-dashoffset:213.6;
+    transition: stroke-dashoffset 1.1s cubic-bezier(.22,1,.36,1);
+  }
+  .speed-ring-center{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .speed-val{ font-family:'Fraunces', serif; font-size:19px; font-weight:600; color:var(--gold-pale); }
+  .speed-unit{ font-size:9px; color:var(--text-lo); text-transform:uppercase; letter-spacing:0.06em; margin-top:1px; }
+  .speed-right{ flex:1; min-width:0; }
+  .speed-title{ font-size:14px; font-weight:700; color:var(--text-hi); }
+  .speed-sub{ font-size:11.5px; color:var(--text-mid); margin-top:3px; line-height:1.4; }
+  .speed-btn{
+    margin-top:10px;
+    padding:8px 16px;
+    border-radius:999px;
+    border:1px solid rgba(232,196,104,0.4);
+    background: linear-gradient(180deg, rgba(232,196,104,0.16), rgba(232,196,104,0.05));
+    color:var(--gold-pale);
+    font-family:'Manrope', sans-serif; font-weight:700; font-size:12px;
+    cursor:pointer;
+    transition: box-shadow .2s ease, opacity .2s ease;
+  }
+  .speed-btn:hover{ box-shadow: 0 0 18px -2px rgba(232,196,104,0.45); }
+  .speed-btn:disabled{ opacity:0.55; cursor:default; }
+  /* Pulsing ring while a test is running */
+  @keyframes speedPulse{
+    0%,100%{ box-shadow: 0 0 0 0 rgba(232,196,104,0.35); }
+    50%{ box-shadow: 0 0 0 10px rgba(232,196,104,0); }
+  }
+  .speed-ring.testing{ border-radius:50%; animation: speedPulse 1.3s ease-out infinite; }
+  .speed-ring.testing .speed-val{ animation: speedFlicker 0.6s ease-in-out infinite; }
+  @keyframes speedFlicker{ 0%,100%{ opacity:1; } 50%{ opacity:0.45; } }
+
   /* ---------- COVERAGE BANNER ---------- */
   .coverage-banner{
     margin:16px 22px 0;
@@ -800,6 +865,27 @@
     </select>
   </div>
 
+  <!-- NETWORK SPEED WIDGET -->
+  <div class="speed-card" id="speedCard">
+    <div class="speed-left">
+      <div class="speed-ring" id="speedRing">
+        <svg viewBox="0 0 80 80">
+          <circle class="speed-ring-track" cx="40" cy="40" r="34"/>
+          <circle class="speed-ring-fill" id="speedRingFill" cx="40" cy="40" r="34"/>
+        </svg>
+        <div class="speed-ring-center">
+          <div class="speed-val" id="speedVal">—</div>
+          <div class="speed-unit">Mbps</div>
+        </div>
+      </div>
+    </div>
+    <div class="speed-right">
+      <div class="speed-title">Network speed</div>
+      <div class="speed-sub" id="speedSub">Check how fast the dish is running right now.</div>
+      <button class="speed-btn" id="speedBtn">Test speed</button>
+    </div>
+  </div>
+
   <!-- PACKAGES -->
   <div class="section">
     <div class="section-eyebrow">Data packages</div>
@@ -1156,8 +1242,8 @@
       </div>
       <div class="field mono">
         <label>Device MAC address</label>
-        <input type="text" id="custMac" placeholder="AA:BB:CC:DD:EE:FF" maxlength="17">
-        <div class="field-hint" id="macHint">Find this in your phone's WiFi settings under "MAC address" or "Device address" — used only to connect your device to our network.</div>
+        <div class="mac-detected" id="formMacDisplay">Detecting…</div>
+        <div class="field-hint" id="macHint">Detected automatically from your connection — no need to type it in.</div>
       </div>
 
       <button class="confirm-btn" id="confirmBtn">Pay &amp; connect device</button>
@@ -1583,14 +1669,23 @@
   const sumName = document.getElementById('sumName');
   const sumMeta = document.getElementById('sumMeta');
   const sumPrice = document.getElementById('sumPrice');
-  const macInput = document.getElementById('custMac');
+  const formMacDisplay = document.getElementById('formMacDisplay');
   const confirmBtn = document.getElementById('confirmBtn');
 
-  // Prefill + lock the MAC field when the router already told us the device's MAC.
+  // No manual MAC entry on this form anymore — it's read straight from
+  // routerMac (set above from the captive-portal redirect URL). If it's
+  // missing, the customer opened this page outside the hotspot's login
+  // flow, so we tell them how to fix that and disable checkout instead
+  // of letting them guess/mistype a MAC by hand.
   if(routerMac){
-    macInput.value = routerMac.toUpperCase();
-    macInput.readOnly = true;
-    macHint.textContent = 'Detected automatically from your connection — no need to type it in.';
+    formMacDisplay.textContent = routerMac.toUpperCase();
+  } else {
+    formMacDisplay.textContent = 'Not detected';
+    formMacDisplay.classList.add('missing');
+    macHint.textContent = "We couldn't detect your device. Please open this page from the WiFi sign-in screen on the device you want connected.";
+    confirmBtn.disabled = true;
+    confirmBtn.style.opacity = '0.5';
+    confirmBtn.style.cursor = 'not-allowed';
   }
 
   const stepForm = document.getElementById('stepForm');
@@ -1655,18 +1750,14 @@
   closeSheet.addEventListener('click', closeModal);
   overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
 
-  // Auto-format MAC address as the user types
-  macInput.addEventListener('input', (e) => {
-    let v = e.target.value.replace(/[^0-9a-fA-F]/g, '').toUpperCase().slice(0,12);
-    let formatted = v.match(/.{1,2}/g)?.join(':') || v;
-    e.target.value = formatted;
-  });
-
   confirmBtn.addEventListener('click', () => {
     const name = document.getElementById('custName').value.trim();
     const phone = document.getElementById('custPhone').value.trim();
-    const mac = macInput.value.trim();
-    if(!name || !phone || mac.length < 17){
+    if(!routerMac){
+      formMacDisplay.classList.add('missing');
+      return;
+    }
+    if(!name || !phone){
       confirmBtn.textContent = 'Please fill in all fields';
       confirmBtn.style.background = 'linear-gradient(120deg,#d98a6a,#a9522f)';
       setTimeout(()=>{
@@ -1675,7 +1766,7 @@
       }, 1600);
       return;
     }
-    startPayment({ name, phone, mac, package: selectedPackage });
+    startPayment({ name, phone, mac: routerMac.toUpperCase(), package: selectedPackage });
   });
 
   /*
@@ -1804,6 +1895,76 @@
     document.getElementById('supportOverlay').classList.add('open');
   });
   document.getElementById('doneBtn').addEventListener('click', closeModal);
+
+  /*
+   * ---------------------------------------------------------------
+   * NETWORK SPEED TEST
+   *
+   * Downloads a known-size chunk from Cloudflare's public speed-test
+   * endpoint (the same one their own speed.cloudflare.com tool uses:
+   * https://speed.cloudflare.com/__down?bytes=N) and times it with
+   * performance.now() to estimate a download rate. This is a rough
+   * client-side estimate, not a lab-grade measurement — no dedicated
+   * speed-test backend is deployed for this project.
+   *
+   * IMPORTANT CAVEAT: on a real MikroTik/CoovaChilli captive portal,
+   * a device that hasn't paid yet usually can't reach the open
+   * internet at all — only this portal's own domain is in the
+   * "walled garden" until binding completes. So this test will
+   * often fail with a network error for anyone testing *before*
+   * they've paid, which is most people looking at this landing
+   * page. That's expected, not a bug — the catch below shows a
+   * friendly message instead of a raw error for that case.
+   * ---------------------------------------------------------------
+   */
+  const speedBtn = document.getElementById('speedBtn');
+  const speedRing = document.getElementById('speedRing');
+  const speedRingFill = document.getElementById('speedRingFill');
+  const speedVal = document.getElementById('speedVal');
+  const speedSub = document.getElementById('speedSub');
+  const SPEED_RING_CIRC = 213.6;
+  const SPEED_TEST_BYTES = 3_000_000; // 3MB — enough to get a stable reading without being heavy on a hotspot data cap
+  const SPEED_TEST_URL = `https://speed.cloudflare.com/__down?bytes=${SPEED_TEST_BYTES}`;
+
+  function setSpeedRing(mbps){
+    // Scale the ring visually up to a 50 Mbps cap so typical hotspot
+    // speeds (a few Mbps to ~20) still show a meaningful arc.
+    const pct = Math.min(mbps / 50, 1);
+    speedRingFill.style.strokeDashoffset = String(SPEED_RING_CIRC * (1 - pct));
+  }
+
+  speedBtn.addEventListener('click', async () => {
+    speedBtn.disabled = true;
+    speedBtn.textContent = 'Testing…';
+    speedRing.classList.add('testing');
+    speedSub.textContent = 'Measuring your connection…';
+    speedVal.textContent = '—';
+    setSpeedRing(0);
+
+    try {
+      const start = performance.now();
+      const res = await fetch(`${SPEED_TEST_URL}&t=${Date.now()}`, { cache: 'no-store' });
+      if(!res.ok) throw new Error('bad response');
+      const blob = await res.blob();
+      const seconds = (performance.now() - start) / 1000;
+      const mbps = (blob.size * 8) / seconds / 1_000_000;
+      speedVal.textContent = mbps.toFixed(1);
+      setSpeedRing(mbps);
+      speedSub.textContent = mbps >= 8
+        ? 'Great signal — smooth for video and downloads.'
+        : mbps >= 2
+          ? 'Decent for browsing and streaming SD video.'
+          : 'A bit slow right now — try again in a moment.';
+    } catch (err) {
+      speedVal.textContent = '—';
+      setSpeedRing(0);
+      speedSub.textContent = "Couldn't reach the network — this only works once your device is connected.";
+    } finally {
+      speedRing.classList.remove('testing');
+      speedBtn.disabled = false;
+      speedBtn.textContent = 'Test speed';
+    }
+  });
 </script>
 
 </body>
